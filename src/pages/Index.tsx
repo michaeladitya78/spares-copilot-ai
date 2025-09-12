@@ -16,12 +16,12 @@ const Index = () => {
               <Badge variant="secondary" className="text-xs font-medium px-3 py-1">
                 Microsoft Teams Integration
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
-                AI Spare Parts Copilot
+              <h1 className="text-4xl md:text-6xl font-bold text-synapse-blue">
+                Synapse
               </h1>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Revolutionize your assembly machine maintenance with intelligent part identification 
-                and real-time inventory management powered by AI.
+                AI-Powered Spare Parts Intelligence. Revolutionize your assembly machine maintenance 
+                with intelligent part identification and real-time inventory management.
               </p>
             </div>
             
@@ -108,7 +108,7 @@ const Index = () => {
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-4">Try the Demo</h2>
             <p className="text-muted-foreground">
-              Experience how the Spares Copilot identifies parts and checks inventory in real-time
+              Experience how Synapse identifies parts and checks inventory in real-time
             </p>
           </div>
           
