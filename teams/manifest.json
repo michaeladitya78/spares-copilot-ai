@@ -1,0 +1,56 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.17/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.17",
+  "version": "1.0.0",
+  "id": "synapse-spares-ai",
+  "packageName": "com.synapse.sparesai",
+  "developer": {
+    "name": "Synapse AI Team",
+    "websiteUrl": "https://github.com/michaeladitya78/spares-copilot-ai",
+    "privacyUrl": "https://github.com/michaeladitya78/spares-copilot-ai/blob/main/PRIVACY.md",
+    "termsOfUseUrl": "https://github.com/michaeladitya78/spares-copilot-ai/blob/main/TERMS.md"
+  },
+  "icons": {
+    "color": "teams/icon-color.png",
+    "outline": "teams/icon-outline.png"
+  },
+  "name": {
+    "short": "Synapse",
+    "full": "Synapse - AI Spare Parts Intelligence"
+  },
+  "description": {
+    "short": "AI-powered spare parts identification and inventory management",
+    "full": "Synapse revolutionizes assembly machine maintenance with intelligent part identification, real-time inventory management, and visual recognition. Get the right part in under five minutes."
+  },
+  "accentColor": "#06B6D4",
+  "configurableTabs": [
+    {
+      "configurationUrl": "https://your-app-domain.vercel.app/teams-config",
+      "scopes": [
+        "team",
+        "groupchat"
+      ]
+    }
+  ],
+  "staticTabs": [
+    {
+      "entityId": "synapse-tab",
+      "name": "Synapse AI",
+      "contentUrl": "https://your-app-domain.vercel.app/",
+      "scopes": [
+        "personal"
+      ]
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "your-app-domain.vercel.app"
+  ],
+  "webApplicationInfo": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "resource": "https://your-app-domain.vercel.app"
+  }
+}
