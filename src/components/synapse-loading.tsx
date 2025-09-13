@@ -10,14 +10,14 @@ interface SynapseLoadingProps {
 
 const loadingSteps = {
   image: [
-    { icon: Search, text: "Analyzing image..." },
-    { icon: Database, text: "Matching against database..." },
-    { icon: CheckCircle, text: "Gathering information..." }
+    { icon: Search, text: "Query received: Analyzing your photo..." },
+    { icon: Database, text: "Searching records: Cross-referencing machine BOM..." },
+    { icon: CheckCircle, text: "Checking live inventory: Contacting Patna warehouse..." }
   ],
   text: [
-    { icon: Search, text: "Searching for your part..." },
-    { icon: Database, text: "Checking inventory..." },
-    { icon: CheckCircle, text: "Verifying warranty status..." }
+    { icon: Search, text: "Parsing request: Understanding your description..." },
+    { icon: Database, text: "Searching records: Cross-referencing machine BOM..." },
+    { icon: CheckCircle, text: "Checking live inventory: Contacting Patna warehouse..." }
   ]
 };
 

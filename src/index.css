@@ -8,61 +8,62 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* Industrial Precision palette */
+    --background: 222 47% 11%; /* Deep Slate #111827 */
+    --foreground: 210 20% 98%; /* Off-White #F9FAFB */
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card: 222 47% 13%;
+    --card-foreground: 210 20% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover: 222 47% 13%;
+    --popover-foreground: 210 20% 98%;
 
-    /* Synapse Professional Theme - Dark Blue Primary */
-    --primary: 210 100% 27%;  /* Professional dark blue #1E3A8A */
+    /* Electric Cyan as primary accent */
+    --primary: 189 95% 43%; /* #06B6D4 */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 210 100% 35%;
+    --primary-glow: 189 95% 50%;
     
-    --secondary: 220 13% 96%;
-    --secondary-foreground: 210 100% 27%;
+    --secondary: 217 12% 65%; /* Cool Grey #9CA3AF */
+    --secondary-foreground: 222 47% 11%;
 
-    --muted: 220 13% 96%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 222 14% 20%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 159 64% 39%;  /* Tech green #10B981 */
+    --accent: 189 95% 43%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 63%; /* #EF4444 */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 210 100% 50%;
+    --border: 220 13% 20%;
+    --input: 220 13% 20%;
+    --ring: 189 95% 43%;
 
-    /* Synapse brand colors */
-    --synapse-blue: 210 100% 27%;     /* Primary dark blue */
-    --synapse-blue-light: 210 100% 95%;
-    --synapse-blue-dark: 210 100% 20%;
-    --synapse-charcoal: 220 18% 20%;  /* Alternative charcoal #1F2937 */
-    --synapse-gray-light: 220 14% 96%;  /* Light grey #F3F4F6 */
+    /* Synapse brand colors mapped to new palette */
+    --synapse-blue: 189 95% 43%;
+    --synapse-blue-light: 189 95% 20%;
+    --synapse-blue-dark: 189 95% 35%;
+    --synapse-charcoal: 222 47% 11%;
+    --synapse-gray-light: 222 14% 20%;
     
     /* Status colors */
-    --success: 159 64% 39%;  /* Tech green #10B981 */
+    --success: 159 64% 39%;  /* #10B981 */
     --success-foreground: 0 0% 98%;
-    --warning: 48 96% 53%;
+    --warning: 38 92% 50%; /* #F59E0B */
     --warning-foreground: 240 10% 3.9%;
-    --info: 210 100% 27%;
+    --info: 189 95% 43%;
     --info-foreground: 0 0% 98%;
     
     /* Synapse gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--synapse-blue)), hsl(var(--synapse-blue-dark)));
-    --gradient-hero: linear-gradient(135deg, hsl(var(--synapse-blue)), hsl(var(--synapse-charcoal)));
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(var(--synapse-gray-light)));
+    --gradient-primary: linear-gradient(135deg, hsl(189 95% 43%), hsl(189 95% 35%));
+    --gradient-hero: linear-gradient(135deg, hsl(222 47% 11%), hsl(222 14% 20%));
+    --gradient-card: linear-gradient(180deg, hsl(222 47% 13%), hsl(222 14% 20%));
     --gradient-success: linear-gradient(135deg, hsl(var(--success)), hsl(159 64% 32%));
     
     /* Professional shadows */
-    --shadow-elegant: 0 10px 30px -10px hsl(var(--synapse-blue) / 0.15);
+    --shadow-elegant: 0 10px 30px -10px hsl(189 95% 43% / 0.15);
     --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.2);
-    --shadow-card: 0 4px 12px -4px hsl(var(--synapse-blue) / 0.1);
+    --shadow-card: 0 4px 12px -4px hsl(189 95% 43% / 0.1);
     --shadow-success: 0 4px 12px -4px hsl(var(--success) / 0.2);
     
     /* Smooth animations */
@@ -90,34 +91,34 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 222 47% 11%;
     --foreground: 0 0% 98%;
 
-    --card: 240 10% 3.9%;
+    --card: 222 47% 13%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 10% 3.9%;
+    --popover: 222 47% 13%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 210 100% 35%;  /* Slightly lighter for dark mode */
+    --primary: 189 95% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 210 100% 45%;
+    --primary-glow: 189 95% 60%;
 
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 222 14% 20%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 222 14% 20%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 240 3.7% 15.9%;
+    --accent: 189 95% 35%;
     --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84% 63%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 210 100% 50%;
+    --border: 222 14% 20%;
+    --input: 222 14% 20%;
+    --ring: 189 95% 43%;
 
     /* Dark mode enterprise colors */
     --enterprise-blue: 210 100% 50%;
@@ -128,8 +129,8 @@ All colors MUST be HSL.
     
     /* Gradients for dark mode */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-hero: linear-gradient(135deg, hsl(210 100% 40%), hsl(220 100% 50%));
-    --gradient-card: linear-gradient(180deg, hsl(240 10% 3.9%), hsl(240 3.7% 15.9%));
+    --gradient-hero: linear-gradient(135deg, hsl(222 47% 11%), hsl(222 14% 20%));
+    --gradient-card: linear-gradient(180deg, hsl(222 47% 13%), hsl(222 14% 20%));
     
     /* Shadows for dark mode */
     --shadow-elegant: 0 10px 30px -10px hsl(0 0% 0% / 0.3);
@@ -153,5 +154,17 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  }
+}
+
+@layer base {
+  :is(button, a, input, textarea, select, [role="button"])::selection {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+  :is(button, a, input, textarea, select, [role="button"]):focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 }

@@ -14,14 +14,12 @@ export const SynapseWelcome = React.forwardRef<HTMLDivElement, SynapseWelcomePro
   ({ onIdentifyByPhoto, onIdentifyByDescription, className }, ref) => {
     return (
       <div ref={ref} className={cn("p-6 space-y-6", className)}>
-        {/* Welcome Message */}
+        {/* Welcome Message */
+         /* Vision: Five-Minute Fix */}
         <div className="text-center space-y-3 animate-fade-in">
-          <h2 className="text-xl font-semibold text-foreground">
-            Welcome to Synapse
-          </h2>
+          <h2 className="text-xl font-semibold text-foreground">Synapse is ready.</h2>
           <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
-            Your intelligent assistant for spare parts identification and inventory management. 
-            How can I help you find a part today?
+            Upload a photo or describe the part you need. Get the right answer in under five minutes.
           </p>
         </div>
 
@@ -65,8 +63,8 @@ export const SynapseWelcome = React.forwardRef<HTMLDivElement, SynapseWelcomePro
                 <Clock className="h-4 w-4 text-success" />
               </div>
               <div>
-                <p className="text-xs font-medium text-foreground">Instant Results</p>
-                <p className="text-xs text-muted-foreground">Response in seconds</p>
+                <p className="text-xs font-medium text-foreground">Speed to Answer</p>
+                <p className="text-xs text-muted-foreground">Under 3 seconds</p>
               </div>
             </div>
           </Card>

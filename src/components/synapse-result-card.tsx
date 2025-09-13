@@ -11,7 +11,8 @@ import {
   Calendar,
   MapPin,
   Hash,
-  Monitor
+  Monitor,
+  Copy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +24,7 @@ interface PartData {
   quantity: number;
   warranty: boolean;
   warrantyDate: string | null;
+  imageUrl?: string | null;
 }
 
 interface SynapseResultCardProps {
@@ -34,6 +36,7 @@ interface SynapseResultCardProps {
 export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultCardProps>(
   ({ partData, className, animationDelay = 0 }, ref) => {
     const [isVisible, setIsVisible] = React.useState(false);
+    const [copied, setCopied] = React.useState(false);
 
     React.useEffect(() => {
       const timer = setTimeout(() => {
@@ -53,9 +56,17 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
           "animate-fade-in-up"
         )}>
           <div className="flex items-start gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-synapse-blue-light rounded-xl flex items-center justify-center shadow-sm">
-              <Package className="h-8 w-8 text-primary" />
-            </div>
+            {partData.imageUrl ? (
+              <img
+                src={partData.imageUrl}
+                alt={partData.name}
+                className="w-16 h-16 rounded-xl object-cover border"
+              />
+            ) : (
+              <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-synapse-blue-light rounded-xl flex items-center justify-center shadow-sm">
+                <Package className="h-8 w-8 text-primary" />
+              </div>
+            )}
             
             <div className="flex-1 space-y-3">
               <div>
@@ -65,6 +76,22 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
                   <code className="text-sm font-mono bg-synapse-gray-light px-2 py-0.5 rounded text-synapse-blue">
                     {partData.partNumber}
                   </code>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className={cn("h-7 px-2 py-0 ml-2 text-xs border-primary/30")}
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(partData.partNumber);
+                        setCopied(true);
+                        setTimeout(() => setCopied(false), 1500);
+                      } catch {}
+                    }}
+                    aria-label="Copy part number"
+                  >
+                    <Copy className="h-3 w-3 mr-1" />
+                    {copied ? "Copied" : "Copy"}
+                  </Button>
                 </div>
               </div>
               
@@ -102,10 +129,12 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
                   variant={partData.inStock ? "default" : "destructive"}
                   className={cn(
                     "text-xs",
-                    partData.inStock && "bg-gradient-success text-success-foreground animate-glow"
+                    partData.inStock && (partData.quantity < 5
+                      ? "bg-warning/20 text-warning"
+                      : "bg-gradient-success text-success-foreground animate-glow")
                   )}
                 >
-                  {partData.inStock ? "IN STOCK" : "OUT OF STOCK"}
+                  {partData.inStock ? (partData.quantity < 5 ? "LOW STOCK" : "IN STOCK") : "OUT OF STOCK"}
                 </Badge>
               </div>
               

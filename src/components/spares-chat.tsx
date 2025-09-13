@@ -31,7 +31,8 @@ const mockParts = [
     inStock: true,
     quantity: 4,
     warranty: true,
-    warrantyDate: "October 2026"
+    warrantyDate: "October 2026",
+    imageUrl: "/placeholder.svg"
   },
   {
     partNumber: "MTR-V200-002",
@@ -40,7 +41,8 @@ const mockParts = [
     inStock: false,
     quantity: 0,
     warranty: true,
-    warrantyDate: "March 2025"
+    warrantyDate: "March 2025",
+    imageUrl: "/placeholder.svg"
   },
   {
     partNumber: "SEN-P450-003",
@@ -49,7 +51,8 @@ const mockParts = [
     inStock: true,
     quantity: 12,
     warranty: false,
-    warrantyDate: null
+    warrantyDate: null,
+    imageUrl: "/placeholder.svg"
   }
 ];
 
@@ -60,6 +63,8 @@ export function SparesChat() {
   const [isLoading, setIsLoading] = useState(false);
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [loadingType, setLoadingType] = useState<"image" | "text">("text");
+  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -89,10 +94,32 @@ export function SparesChat() {
   const generateBotResponse = async (userMessage: string, isImageUpload = false) => {
     await simulateProcessing();
 
+    try {
+      if (!isImageUpload && userMessage.trim()) {
+        const res = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: [{ role: 'user', content: userMessage }] })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const response: Message = {
+            id: Date.now().toString(),
+            content: data.text || 'No response',
+            sender: 'bot',
+            timestamp: new Date(),
+            type: 'text'
+          };
+          setMessages(prev => [...prev, response]);
+          return;
+        }
+      }
+    } catch (e) {
+      // fall back to mock logic
+    }
+
     let partData;
-    
     if (isImageUpload) {
-      // Simulate image recognition
       partData = mockParts[Math.floor(Math.random() * mockParts.length)];
     } else if (userMessage.toLowerCase().includes('bearing') || userMessage.toLowerCase().includes('x-75')) {
       partData = mockParts[0];
@@ -101,15 +128,16 @@ export function SparesChat() {
     } else if (userMessage.toLowerCase().includes('sensor') || userMessage.toLowerCase().includes('p450')) {
       partData = mockParts[2];
     } else {
-      // Show not found message
-      const response: Message = {
+      const options = [mockParts[0], mockParts[2]];
+      const disambiguation: Message = {
         id: Date.now().toString(),
-        content: "I couldn't find an exact match for that description. Would you like to try again with more details or upload a photo of the part?",
+        content: "I found a couple of possibilities. Which one looks correct?",
         sender: "bot",
         timestamp: new Date(),
-        type: "text"
+        type: "result",
+        data: { disambiguate: true, options }
       };
-      setMessages(prev => [...prev, response]);
+      setMessages(prev => [...prev, disambiguation]);
       return;
     }
 
@@ -160,6 +188,11 @@ export function SparesChat() {
   };
 
   const handleFileUpload = async (file: File) => {
+    // Living input: show thumbnail and progress
+    const previewUrl = URL.createObjectURL(file);
+    setUploadPreview(previewUrl);
+    setUploadProgress(10);
+
     const userMessage: Message = {
       id: Date.now().toString(),
       content: `Uploaded image: ${file.name}`,
@@ -172,7 +205,23 @@ export function SparesChat() {
     setLoadingType("image");
     setShowFileUpload(false);
 
+    // Simulate progressive upload
+    let progress = 10;
+    const interval = setInterval(() => {
+      progress = Math.min(progress + Math.floor(Math.random() * 25), 95);
+      setUploadProgress(progress);
+      if (progress >= 95) {
+        clearInterval(interval);
+      }
+    }, 200);
+
     await generateBotResponse("", true);
+    setUploadProgress(100);
+    setTimeout(() => {
+      setUploadPreview(null);
+      setUploadProgress(0);
+      URL.revokeObjectURL(previewUrl);
+    }, 800);
   };
 
   const handleReset = () => {
@@ -206,6 +255,41 @@ export function SparesChat() {
             <div className="p-4 space-y-4">
               {messages.map((message) => {
                 if (message.type === "result" && message.data) {
+                  if (message.data.disambiguate && message.data.options) {
+                    return (
+                      <div key={message.id} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {message.data.options.map((opt: any, idx: number) => (
+                          <div key={idx} className="space-y-2">
+                            <SynapseResultCard partData={opt} animationDelay={0} />
+                            <Button
+                              className="w-full"
+                              onClick={() => {
+                                const confirmMsg: Message = {
+                                  id: Date.now().toString(),
+                                  content: `Selected ${opt.partNumber}`,
+                                  sender: "user",
+                                  timestamp: new Date(),
+                                  type: "text"
+                                };
+                                setMessages(prev => [...prev, confirmMsg]);
+                                const confirmed: Message = {
+                                  id: (Date.now() + 1).toString(),
+                                  content: `Part identified: ${opt.name}`,
+                                  sender: "bot",
+                                  timestamp: new Date(),
+                                  type: "result",
+                                  data: opt
+                                };
+                                setMessages(prev => [...prev, confirmed]);
+                              }}
+                            >
+                              Select This Part
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  }
                   return (
                     <SynapseResultCard
                       key={message.id}
@@ -293,6 +377,16 @@ export function SparesChat() {
                 className="flex-1 border-border/50 focus:border-primary"
                 disabled={isLoading}
               />
+              {uploadPreview && (
+                <div className="flex items-center gap-2">
+                  <div className="relative w-10 h-10 rounded-md overflow-hidden border">
+                    <img src={uploadPreview} alt="Upload preview" className="w-full h-full object-cover" />
+                    <div className="absolute inset-x-0 bottom-0 h-1 bg-muted">
+                      <div className="h-full bg-primary" style={{ width: `${uploadProgress}%` }} />
+                    </div>
+                  </div>
+                </div>
+              )}
               <Button
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim() || isLoading}
