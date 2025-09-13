@@ -9,6 +9,7 @@ import { SynapseWelcome } from "@/components/synapse-welcome";
 import { SynapseResultCard } from "@/components/synapse-result-card";
 import { SynapseLoading } from "@/components/synapse-loading";
 import { FileUpload } from "@/components/ui/file-upload";
+import { CameraCapture } from "@/components/ui/camera-capture";
 import { Send, Paperclip, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -91,16 +92,22 @@ export function SparesChat() {
     });
   };
 
-  const generateBotResponse = async (userMessage: string, isImageUpload = false) => {
+  const generateBotResponse = async (userMessage: string, isImageUpload = false, imageData?: string) => {
     await simulateProcessing();
 
     try {
-      if (!isImageUpload && userMessage.trim()) {
+      if (userMessage.trim() || imageData) {
+        const body: any = { messages: [{ role: 'user', content: userMessage || 'Identify this part' }] };
+        if (imageData) {
+          body.image = imageData;
+        }
+
         const res = await fetch('/api/ask', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: [{ role: 'user', content: userMessage }] })
+          body: JSON.stringify(body)
         });
+        
         if (res.ok) {
           const data = await res.json();
           const response: Message = {
@@ -193,9 +200,52 @@ export function SparesChat() {
     setUploadPreview(previewUrl);
     setUploadProgress(10);
 
+    // Convert to base64 for API
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = reader.result as string;
+      
+      const userMessage: Message = {
+        id: Date.now().toString(),
+        content: `Uploaded image: ${file.name}`,
+        sender: "user",
+        timestamp: new Date(),
+        type: "image"
+      };
+
+      setMessages(prev => [...prev, userMessage]);
+      setLoadingType("image");
+      setShowFileUpload(false);
+
+      // Simulate progressive upload
+      let progress = 10;
+      const interval = setInterval(() => {
+        progress = Math.min(progress + Math.floor(Math.random() * 25), 95);
+        setUploadProgress(progress);
+        if (progress >= 95) {
+          clearInterval(interval);
+        }
+      }, 200);
+
+      await generateBotResponse("", true, base64);
+      setUploadProgress(100);
+      setTimeout(() => {
+        setUploadPreview(null);
+        setUploadProgress(0);
+        URL.revokeObjectURL(previewUrl);
+      }, 800);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleCameraCapture = async (imageBlob: Blob, imageDataUrl: string) => {
+    // Living input: show thumbnail and progress
+    setUploadPreview(imageDataUrl);
+    setUploadProgress(10);
+
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: `Uploaded image: ${file.name}`,
+      content: "Captured image from camera",
       sender: "user",
       timestamp: new Date(),
       type: "image"
@@ -203,7 +253,6 @@ export function SparesChat() {
 
     setMessages(prev => [...prev, userMessage]);
     setLoadingType("image");
-    setShowFileUpload(false);
 
     // Simulate progressive upload
     let progress = 10;
@@ -215,12 +264,11 @@ export function SparesChat() {
       }
     }, 200);
 
-    await generateBotResponse("", true);
+    await generateBotResponse("", true, imageDataUrl);
     setUploadProgress(100);
     setTimeout(() => {
       setUploadPreview(null);
       setUploadProgress(0);
-      URL.revokeObjectURL(previewUrl);
     }, 800);
   };
 
@@ -367,6 +415,7 @@ export function SparesChat() {
             >
               <Paperclip className="h-4 w-4" />
             </Button>
+            <CameraCapture onCapture={handleCameraCapture} />
             <div className="flex-1 flex gap-2">
               <Input
                 ref={inputRef}

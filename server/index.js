@@ -28,21 +28,42 @@ app.post("/api/ask", async (req, res) => {
       return res.status(500).json({ error: "Server missing GEMINI_API_KEY" });
     }
 
-    const { messages } = req.body || {};
+    const { messages, image } = req.body || {};
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: "messages array is required" });
     }
 
-    const userText = messages.map(m => `${m.role || "user"}: ${m.content}`).join("\n");
-
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-    const result = await model.generateContent(userText);
+    
+    let prompt;
+    
+    if (image) {
+      // Handle image + text with Gemini Vision
+      const base64Data = image.replace(/^data:image\/[a-z]+;base64,/, "");
+      const imagePart = {
+        inlineData: {
+          data: base64Data,
+          mimeType: "image/jpeg"
+        }
+      };
+      
+      const userText = messages.map(m => m.content).join(" ");
+      const visionPrompt = userText || "Identify this spare part. Provide the part number, name, machine compatibility, and current inventory status if available.";
+      
+      prompt = [visionPrompt, imagePart];
+    } else {
+      // Handle text-only
+      const userText = messages.map(m => `${m.role || "user"}: ${m.content}`).join("\n");
+      prompt = userText;
+    }
+
+    const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
     res.json({ text });
   } catch (err) {
-    console.error(err);
+    console.error("Gemini API error:", err);
     res.status(500).json({ error: "Gemini request failed" });
   }
 });
