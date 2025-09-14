@@ -217,17 +217,17 @@ export function SparesChat() {
     if (isImageUpload) {
       partData = cachedParts[Math.floor(Math.random() * cachedParts.length)];
     } else if (userMessage.toLowerCase().includes('bearing') || userMessage.toLowerCase().includes('x-75')) {
-      partData = cachedParts.find(p => p.partNumber === "BRG-X75-001") || cachedParts[0];
+      partData = cachedParts.find(p => p.partNumber === "TATA-BEAR-X75-001") || cachedParts[0];
     } else if (userMessage.toLowerCase().includes('motor') || userMessage.toLowerCase().includes('v200')) {
-      partData = cachedParts.find(p => p.partNumber === "MTR-V200-002") || cachedParts[1];
+      partData = cachedParts.find(p => p.partNumber === "TATA-MOTOR-V200-002") || cachedParts[1];
     } else if (userMessage.toLowerCase().includes('sensor') || userMessage.toLowerCase().includes('p450')) {
-      partData = cachedParts.find(p => p.partNumber === "SEN-P450-003") || cachedParts[2];
+      partData = cachedParts.find(p => p.partNumber === "TATA-SENSOR-P450-003") || cachedParts[2];
     } else {
       // Search for parts and show disambiguation if multiple found
       const searchResults = cachedParts.filter(part => 
         part.name.toLowerCase().includes(userMessage.toLowerCase()) ||
         part.partNumber.toLowerCase().includes(userMessage.toLowerCase()) ||
-        part.machine.toLowerCase().includes(userMessage.toLowerCase())
+        part.description.toLowerCase().includes(userMessage.toLowerCase())
       );
 
       if (searchResults.length > 1) {

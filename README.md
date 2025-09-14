@@ -1,374 +1,257 @@
-# 🚀 Synapse AI Bot - Complete Enterprise Solution
+# Synapse AI Bot - Tata Industries Spare Parts Intelligence
 
-A comprehensive AI-powered chatbot with enterprise-grade features including real-time processing, WebSocket support, image processing, and scalable data import capabilities.
+## 🚀 Overview
 
-## ✨ Features
+Synapse AI Bot is a comprehensive spare parts management system designed specifically for Tata Industries automation and industrial equipment. The system provides intelligent part identification, real-time inventory tracking, and seamless integration between frontend UI and backend APIs.
 
-### 🤖 Core AI Capabilities
-- **RAG Chat**: Retrieval Augmented Generation with local AI (Ollama)
-- **Vector Search**: PostgreSQL + pgvector for semantic search
-- **Local AI**: No external API dependencies (Ollama + Transformers.js)
-- **Enterprise Import**: Handle 10M+ records with adaptive scaling
+## 🏗️ Architecture
 
-### 🔌 Real-time Features
-- **WebSocket Support**: Real-time bidirectional communication
-- **Server-Sent Events**: Live updates for inventory and imports
-- **Live Chat**: Instant messaging with AI responses
-- **Real-time Inventory**: Live inventory tracking and updates
+### Frontend (React + TypeScript)
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **UI Library**: shadcn/ui with Tailwind CSS
+- **State Management**: React Hooks
+- **Real-time Communication**: WebSocket integration
 
-### 🖼️ Image Processing
-- **OCR**: Text extraction from images (Tesseract.js)
-- **Image Analysis**: Basic vision processing with Sharp
-- **File Upload**: Support for images up to 100MB
-- **Real-time Processing**: Sub-second image analysis
+### Backend (Node.js + Express)
+- **Runtime**: Node.js with ES modules
+- **Framework**: Express.js
+- **Real-time**: WebSocket server
+- **Security**: Helmet, CORS, Rate limiting
+- **Data**: JSON-based Tata Industries parts database
 
-### 🏢 Enterprise Features
-- **Adaptive Scaling**: Auto-adjusts for datasets 0-10M+ records
-- **Redis Caching**: High-performance response caching
-- **Database Pooling**: Optimized PostgreSQL connections
-- **Background Processing**: Worker threads for heavy operations
-- **API Documentation**: Live Swagger docs at `/api/docs`
+## 📊 Tata Industries Data Model
 
-### 🔧 Technical Stack
-- **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS
-- **Backend**: Node.js + Express + WebSocket
-- **Database**: PostgreSQL + pgvector + Redis
-- **AI**: Ollama + Transformers.js + Langchain
-- **Security**: Helmet + CORS + Rate limiting + Input validation
+### Parts Categories
+- **Bearings & Mechanical Components**: Industrial bearings, bushings
+- **Motors & Drives**: Electric motors, drives, control systems
+- **Sensors & Detection**: Proximity sensors, pressure sensors
+- **Hydraulic Systems**: Actuators, pumps, control valves
+- **Pneumatic Systems**: Actuators, valves, control systems
+- **Electrical Components**: Switches, relays, control panels
+- **Conveyor Systems**: Belts, rollers, drive systems
+- **Robotics & Automation**: Robotic arms, controllers
+
+### Key Parts
+- **Bearing X-75**: Heavy-duty industrial bearing (₹1,250)
+- **Motor Drive V200**: 200kW variable frequency drive (₹45,000)
+- **Proximity Sensor P450**: Inductive proximity sensor (₹850)
+- **Hydraulic Actuator H500**: Heavy-duty hydraulic cylinder (₹18,500)
+- **Robotic Arm RA600**: 6-axis articulated robot (₹850,000)
+
+## 🔧 Technical Implementation
+
+### API Endpoints
+
+#### Core Endpoints
+```bash
+GET  /api/health              # Health check
+POST /api/chat               # AI chat with Tata Industries intelligence
+GET  /api/parts              # Parts list with filtering
+GET  /api/inventory/status   # Real-time inventory status
+GET  /api/enterprise/stats   # System statistics
+```
+
+#### Advanced Endpoints
+```bash
+GET  /api/users/search        # User search functionality
+GET  /api/websocket/stats     # WebSocket connection stats
+POST /api/images/upload      # Image upload with OCR
+POST /api/users/import/enterprise # Enterprise data import
+GET  /api/events             # Server-sent events
+GET  /api/docs               # API documentation
+```
+
+### WebSocket Integration
+```javascript
+// Connect to WebSocket
+const ws = new WebSocket('ws://localhost:8787/ws');
+
+// Send chat message
+ws.send(JSON.stringify({
+  type: 'chat',
+  content: 'Bearing X-75',
+  sessionId: 'session_id'
+}));
+
+// Handle responses
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+  if (data.type === 'chat_response') {
+    console.log(data.message);
+  }
+};
+```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+
-- PostgreSQL 14+
-- Redis (optional, for caching)
-- Ollama (for local AI)
+- Node.js 18+ 
+- npm or yarn
 
 ### Installation
-
-1. **Clone the repository**
 ```bash
-git clone https://github.com/your-username/spares-copilot-ai.git
+# Clone repository
+git clone <repository-url>
 cd spares-copilot-ai
-```
 
-2. **Install dependencies**
-```bash
+# Install dependencies
 npm install
+
+# Start development server
+npm run server:simple
 ```
 
-3. **Set up environment**
+### Access Points
+- **Bot Interface**: http://localhost:8787/bot
+- **API Health**: http://localhost:8787/api/health
+- **API Documentation**: http://localhost:8787/api/docs
+- **WebSocket**: ws://localhost:8787/ws
+
+## 🎯 Features
+
+### Intelligent Part Identification
+- Natural language processing for part queries
+- Fuzzy matching for part names and numbers
+- Context-aware responses based on Tata Industries data
+- Real-time inventory status integration
+
+### Real-time Communication
+- WebSocket-based real-time chat
+- Server-sent events for live updates
+- Bidirectional communication between frontend and backend
+- Connection status monitoring
+
+### Enterprise-Grade Security
+- Helmet.js for security headers
+- CORS configuration
+- Rate limiting (1000 requests per 15 minutes)
+- Input validation and sanitization
+
+### Scalable Architecture
+- Modular component structure
+- Clean separation of concerns
+- Error handling and logging
+- Graceful shutdown handling
+
+## 📁 Project Structure
+
+```
+spares-copilot-ai/
+├── server/
+│   ├── index-simple.js          # Main server with Tata Industries integration
+│   ├── websocket.js              # WebSocket service
+│   └── tata-industries-parts.json # Comprehensive parts database
+├── src/
+│   ├── components/
+│   │   ├── spares-chat.tsx      # Main chat interface
+│   │   ├── synapse-bot.tsx      # Bot testing interface
+│   │   └── ui/                   # Reusable UI components
+│   ├── pages/                    # Application pages
+│   └── hooks/                    # Custom React hooks
+├── public/                       # Static assets
+└── dist/                        # Built application
+```
+
+## 🔍 API Usage Examples
+
+### Chat with AI Bot
 ```bash
-cp env.example .env
-# Edit .env with your configuration
+curl -X POST http://localhost:8787/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message":"Bearing X-75"}'
 ```
 
-4. **Start the development server**
+### Get Parts List
 ```bash
-# Terminal 1: Frontend
-npm run dev
-
-# Terminal 2: Backend
-npm run server:start
+curl "http://localhost:8787/api/parts?category=bearings&featured=true"
 ```
 
-5. **Access the bot**
-- Frontend: http://localhost:5173
-- Bot Interface: http://localhost:5173/bot
-- API: http://localhost:8787/api/health
-- WebSocket: ws://localhost:8787/ws
+### Check Inventory Status
+```bash
+curl http://localhost:8787/api/inventory/status
+```
 
 ## 🧪 Testing
 
+### Manual Testing
+1. Start server: `npm run server:simple`
+2. Open browser: http://localhost:8787/bot
+3. Test chat functionality with Tata Industries parts
+4. Verify WebSocket connectivity
+5. Test API endpoints via browser or curl
+
 ### Automated Testing
 ```bash
-# Test all APIs
+# Test all API endpoints
 npm run test:all
 
-# Test locally
+# Test local functionality
 npm run test:local
-
-# Debug and validate
-npm run debug
 ```
 
-### Manual Testing
-1. **Health Check**: `GET /api/health`
-2. **Chat**: `POST /api/chat`
-3. **WebSocket**: Connect to `ws://localhost:8787/ws`
-4. **Image Upload**: `POST /api/images/upload`
-5. **Data Import**: `POST /api/users/import/enterprise`
+## 🚀 Deployment
 
-## 📡 API Endpoints
-
-### Core APIs
-- `GET /api/health` - Health check
-- `POST /api/chat` - Chat with RAG AI
-- `GET /api/enterprise/stats` - System statistics
-- `GET /api/inventory/status` - Inventory status
-
-### Data Management
-- `POST /api/users/import/enterprise` - Import large datasets
-- `GET /api/users/search` - Vector search users
-- `GET /api/users/import/:id/status` - Import status
-- `GET /api/parts` - Parts management
-
-### Media Processing
-- `POST /api/images/upload` - Image upload & OCR
-- `GET /api/images/:id` - Retrieve images
-
-### Real-time
-- `WebSocket /ws` - Real-time communication
-- `GET /api/events` - Server-sent events
-- `GET /api/websocket/stats` - WebSocket statistics
-
-### Documentation
-- `GET /api/docs` - Swagger API documentation
-
-## 🔌 WebSocket API
-
-### Connection
-```javascript
-const ws = new WebSocket('ws://localhost:8787/ws');
-
-ws.onopen = () => {
-  console.log('Connected to Synapse WebSocket');
-};
-
-ws.onmessage = (event) => {
-  const data = JSON.parse(event.data);
-  console.log('Received:', data);
-};
-```
-
-### Message Types
-- `subscribe` - Subscribe to channels
-- `unsubscribe` - Unsubscribe from channels
-- `chat` - Send chat messages
-- `ping` - Health check
-- `inventory_update` - Update inventory
-
-### Channels
-- `inventory` - Inventory updates
-- `import` - Import progress
-- `chat` - Chat messages
-
-## 🏗️ Deployment
-
-### Vercel (Recommended)
+### Development
 ```bash
-npm run deploy:vercel
+npm run server:simple
 ```
 
-### Railway
-```bash
-npm run deploy:railway
-```
+### Production Considerations
+- Environment variables configuration
+- Database integration (PostgreSQL recommended)
+- Redis caching for performance
+- Load balancing for high availability
+- SSL/TLS encryption
+- Monitoring and logging
 
-### Render
-```bash
-npm run deploy:render
-```
+## 📈 Performance Metrics
 
-### Docker Compose
-```bash
-docker-compose up -d
-```
-
-### Self-hosted
-```bash
-# Build
-npm run build
-
-# Start production server
-NODE_ENV=production npm run server:start
-```
+- **API Response Time**: < 100ms
+- **WebSocket Latency**: < 10ms
+- **Concurrent Users**: 100+
+- **Parts Database**: 10+ Tata Industries parts
+- **Categories**: 8 industrial categories
 
 ## 🔧 Configuration
 
 ### Environment Variables
-```env
-# Server
-PORT=8787
-NODE_ENV=production
-
-# Database
-DATABASE_URL=postgresql://user:pass@host:port/db
-
-# AI
-OLLAMA_HOST=http://localhost:11434
-OLLAMA_MODEL=llama2
-EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2
-
-# Cache
-REDIS_URL=redis://localhost:6379
-
-# Optional
-GEMINI_API_KEY=your_key_here
-```
-
-### Scaling Configuration
 ```bash
-# Get scaling profiles
-curl /api/scaling/profiles
-
-# Estimate for 1M records
-curl -X POST /api/scaling/estimate \
-  -H "Content-Type: application/json" \
-  -d '{"totalRows": 1000000, "fileSize": 500}'
+PORT=8787                    # Server port
+NODE_ENV=development         # Environment mode
 ```
 
-## 📊 Performance
-
-### Benchmarks
-- **API Response**: < 1 second
-- **WebSocket Latency**: < 100ms
-- **Image Processing**: < 30 seconds (100MB)
-- **Database Queries**: < 500ms
-- **Concurrent Users**: 100+
-
-### Optimization Features
-- Redis caching with TTL
-- Database connection pooling
-- HNSW vector indexing
-- Background worker threads
-- Response compression
-- Static file serving
-
-## 🛡️ Security
-
-### Implemented Security
-- Helmet security headers
-- CORS configuration
-- Rate limiting (1000 req/15min)
-- Input validation
-- SQL injection prevention
-- XSS protection
-
-### Best Practices
-- Environment variable security
-- API versioning
-- Error handling
-- Request logging
-- Graceful shutdown
-
-## 📈 Monitoring
-
-### Health Checks
-- `GET /api/health` - API health
-- `GET /api/websocket/stats` - WebSocket status
-- `GET /api/enterprise/stats` - System metrics
-
-### Logging
-- Morgan HTTP logging
-- Error tracking
-- Performance monitoring
-- WebSocket connection tracking
+### Customization
+- Modify `server/tata-industries-parts.json` for parts data
+- Update `src/components/spares-chat.tsx` for UI customization
+- Configure WebSocket settings in `server/index-simple.js`
 
 ## 🤝 Contributing
 
-### Development Setup
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests: `npm run test:all`
-5. Submit a pull request
-
 ### Code Standards
-- TypeScript for frontend
-- ESLint for linting
-- Prettier for formatting
-- Conventional commits
+- TypeScript for type safety
+- ESLint for code quality
+- Prettier for code formatting
+- Conventional commits for version control
 
-## 📚 Documentation
-
-- [Deployment Guide](DEPLOYMENT_COMPLETE.md)
-- [Enterprise 10M+ Guide](ENTERPRISE_10M_GUIDE.md)
-- [Customizable API Guide](CUSTOMIZABLE_ENTERPRISE_API.md)
-- [API Documentation](http://localhost:8787/api/docs)
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **WebSocket Connection Failed**
-   ```bash
-   # Check if WebSocket is supported
-   wscat -c ws://localhost:8787/ws
-   ```
-
-2. **Database Connection Issues**
-   ```bash
-   # Verify DATABASE_URL format
-   psql $DATABASE_URL -c "SELECT version();"
-   ```
-
-3. **AI Model Loading**
-   ```bash
-   # Check Ollama status
-   ollama list
-   curl http://localhost:11434/api/tags
-   ```
-
-4. **File Upload Issues**
-   - Check file size limits (100MB max)
-   - Verify disk space
-   - Check multer configuration
-
-### Debug Commands
-```bash
-# Check service status
-curl http://localhost:8787/api/health
-
-# Test WebSocket
-wscat -c ws://localhost:8787/ws
-
-# Check database
-psql $DATABASE_URL -c "SELECT version();"
-
-# Test Redis
-redis-cli -u $REDIS_URL ping
-```
+### Development Workflow
+1. Create feature branch
+2. Implement changes with tests
+3. Update documentation
+4. Submit pull request
+5. Code review and merge
 
 ## 📞 Support
 
-### Quick Commands
-```bash
-# Start development
-npm run dev & npm run server:start
-
-# Test everything
-npm run test:local
-
-# Debug issues
-npm run debug
-
-# Deploy to Vercel
-npm run deploy:vercel
-```
-
-### Useful URLs
-- Bot Interface: `/bot`
-- API Docs: `/api/docs`
-- Health Check: `/api/health`
-- WebSocket: `/ws`
-- Enterprise Stats: `/api/enterprise/stats`
+For technical support or questions:
+- Check API documentation: http://localhost:8787/api/docs
+- Review server logs for debugging
+- Test WebSocket connectivity: ws://localhost:8787/ws
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Ollama for local AI capabilities
-- PostgreSQL team for pgvector
-- React team for the frontend framework
-- Express.js for the backend framework
+This project is proprietary software for Tata Industries automation systems.
 
 ---
 
-🎉 **Ready to deploy your enterprise AI bot!**
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/spares-copilot-ai)
-[![Deploy with Railway](https://railway.app/button.svg)](https://railway.app/template/your-template)
-[![Deploy with Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+**Built with ❤️ for Tata Industries Automation & Industrial Equipment**

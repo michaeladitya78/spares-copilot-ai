@@ -8,11 +8,15 @@ import dotenv from "dotenv";
 import { WebSocketServer } from 'ws';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 dotenv.config();
+
+// Load Tata Industries parts data
+const tataPartsData = JSON.parse(fs.readFileSync('./server/tata-industries-parts.json', 'utf8'));
 
 const app = express();
 app.use(helmet());
@@ -149,10 +153,45 @@ class SimpleWebSocketService {
   }
 
   handleChatMessage(clientId, message) {
-    // Simple echo response
+    const content = message.content || 'Hello!';
+    const contentLower = content.toLowerCase();
+    let response = "";
+
+    // Intelligent responses based on Tata Industries data
+    if (contentLower.includes('bearing') || contentLower.includes('x-75')) {
+      const bearing = tataPartsData.parts.find(p => p.id === 'BEAR-X75-001');
+      response = `Found Bearing X-75! Part Number: ${bearing.partNumber}, Quantity: ${bearing.inventory.quantity} units at ${bearing.inventory.location}. Price: ₹${bearing.pricing.unitPrice}. This is a heavy-duty industrial bearing for Tata automation systems.`;
+    } else if (contentLower.includes('motor') || contentLower.includes('v200')) {
+      const motor = tataPartsData.parts.find(p => p.id === 'MOTOR-V200-002');
+      response = `Found Motor Drive V200! Part Number: ${motor.partNumber}, Quantity: ${motor.inventory.quantity} units at ${motor.inventory.location}. Price: ₹${motor.pricing.unitPrice}. This is a 200kW variable frequency drive motor for Tata industrial automation.`;
+    } else if (contentLower.includes('sensor') || contentLower.includes('p450')) {
+      const sensor = tataPartsData.parts.find(p => p.id === 'SENSOR-P450-003');
+      response = `Found Proximity Sensor P450! Part Number: ${sensor.partNumber}, Quantity: ${sensor.inventory.quantity} units at ${sensor.inventory.location}. Price: ₹${sensor.pricing.unitPrice}. This is an inductive proximity sensor for Tata automation quality control.`;
+    } else if (contentLower.includes('inventory') || contentLower.includes('stock')) {
+      const totalParts = tataPartsData.parts.length;
+      const inStock = tataPartsData.parts.filter(p => p.inventory.quantity > 0).length;
+      response = `Tata Industries Inventory Status: ${totalParts} total parts, ${inStock} in stock. Key parts include Bearings, Motors, Sensors, Hydraulic Actuators, and more. Would you like details on any specific part?`;
+    } else if (contentLower.includes('help') || contentLower.includes('what can you do')) {
+      response = `I can help you with: 1) Finding spare parts (try "Bearing X-75", "Motor V200", "Sensor P450"), 2) Checking inventory status, 3) Project information, 4) Technical specifications, 5) Pricing and availability. What would you like to know?`;
+    } else {
+      // Search through parts for any matches
+      const matchingParts = tataPartsData.parts.filter(part => 
+        part.name.toLowerCase().includes(contentLower) ||
+        part.partNumber.toLowerCase().includes(contentLower) ||
+        part.description.toLowerCase().includes(contentLower)
+      );
+      
+      if (matchingParts.length > 0) {
+        const part = matchingParts[0];
+        response = `Found ${part.name}! Part Number: ${part.partNumber}, Quantity: ${part.inventory.quantity} units at ${part.inventory.location}. Price: ₹${part.pricing.unitPrice}. ${part.description}`;
+      } else {
+        response = `I couldn't find specific information about "${content}". Try asking about: Bearing X-75, Motor Drive V200, Proximity Sensor P450, inventory status, or Tata Industries projects. I'm here to help with spare parts and technical information!`;
+      }
+    }
+
     this.sendToClient(clientId, {
       type: 'chat_response',
-      message: `Echo: ${message.content || 'Hello!'}`,
+      message: response,
       sessionId: message.sessionId || 'ws_session',
       timestamp: new Date().toISOString()
     });
@@ -208,11 +247,60 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
-// Chat endpoint
+// Chat endpoint with Tata Industries intelligence
 app.post("/api/chat", (req, res) => {
   const { message } = req.body;
+  
+  if (!message) {
+    return res.json({
+      response: "Hello! I'm Synapse AI Bot for Tata Industries. I can help you find spare parts, check inventory, and provide technical information. What would you like to know?",
+      sessionId: 'simple_session',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  const messageLower = message.toLowerCase();
+  let response = "";
+
+  // Intelligent responses based on Tata Industries data
+  if (messageLower.includes('bearing') || messageLower.includes('x-75')) {
+    const bearing = tataPartsData.parts.find(p => p.id === 'BEAR-X75-001');
+    response = `Found Bearing X-75! Part Number: ${bearing.partNumber}, Quantity: ${bearing.inventory.quantity} units at ${bearing.inventory.location}. Price: ₹${bearing.pricing.unitPrice}. This is a heavy-duty industrial bearing for Tata automation systems.`;
+  } else if (messageLower.includes('motor') || messageLower.includes('v200')) {
+    const motor = tataPartsData.parts.find(p => p.id === 'MOTOR-V200-002');
+    response = `Found Motor Drive V200! Part Number: ${motor.partNumber}, Quantity: ${motor.inventory.quantity} units at ${motor.inventory.location}. Price: ₹${motor.pricing.unitPrice}. This is a 200kW variable frequency drive motor for Tata industrial automation.`;
+  } else if (messageLower.includes('sensor') || messageLower.includes('p450')) {
+    const sensor = tataPartsData.parts.find(p => p.id === 'SENSOR-P450-003');
+    response = `Found Proximity Sensor P450! Part Number: ${sensor.partNumber}, Quantity: ${sensor.inventory.quantity} units at ${sensor.inventory.location}. Price: ₹${sensor.pricing.unitPrice}. This is an inductive proximity sensor for Tata automation quality control.`;
+  } else if (messageLower.includes('inventory') || messageLower.includes('stock')) {
+    const totalParts = tataPartsData.parts.length;
+    const inStock = tataPartsData.parts.filter(p => p.inventory.quantity > 0).length;
+    response = `Tata Industries Inventory Status: ${totalParts} total parts, ${inStock} in stock. Key parts include Bearings, Motors, Sensors, Hydraulic Actuators, and more. Would you like details on any specific part?`;
+  } else if (messageLower.includes('project') || messageLower.includes('x-75')) {
+    const project = tataPartsData.projects.find(p => p.id === 'PROJECT-X75');
+    response = `Project X-75 is an active Tata Industries automation upgrade project with budget ₹${project.budget} and ${project.timeline} timeline. It involves Bearing X-75, Motor Drive V200, and Proximity Sensor P450.`;
+  } else if (messageLower.includes('tata') || messageLower.includes('company')) {
+    response = `Tata Industries is a leading automation and industrial equipment company. We have ${tataPartsData.parts.length} spare parts across ${tataPartsData.categories.length} categories including Bearings, Motors, Sensors, Hydraulics, Pneumatics, Electrical, Conveyors, and Robotics.`;
+  } else if (messageLower.includes('help') || messageLower.includes('what can you do')) {
+    response = `I can help you with: 1) Finding spare parts (try "Bearing X-75", "Motor V200", "Sensor P450"), 2) Checking inventory status, 3) Project information, 4) Technical specifications, 5) Pricing and availability. What would you like to know?`;
+  } else {
+    // Search through parts for any matches
+    const matchingParts = tataPartsData.parts.filter(part => 
+      part.name.toLowerCase().includes(messageLower) ||
+      part.partNumber.toLowerCase().includes(messageLower) ||
+      part.description.toLowerCase().includes(messageLower)
+    );
+    
+    if (matchingParts.length > 0) {
+      const part = matchingParts[0];
+      response = `Found ${part.name}! Part Number: ${part.partNumber}, Quantity: ${part.inventory.quantity} units at ${part.inventory.location}. Price: ₹${part.pricing.unitPrice}. ${part.description}`;
+    } else {
+      response = `I couldn't find specific information about "${message}". Try asking about: Bearing X-75, Motor Drive V200, Proximity Sensor P450, inventory status, or Tata Industries projects. I'm here to help with spare parts and technical information!`;
+    }
+  }
+
   res.json({
-    response: `AI Response: ${message || 'Hello! This is Synapse AI Bot.'}`,
+    response,
     sessionId: 'simple_session',
     timestamp: new Date().toISOString()
   });
@@ -230,25 +318,68 @@ app.get("/api/enterprise/stats", (_req, res) => {
   });
 });
 
-// Inventory status
+// Inventory status with Tata Industries data
 app.get("/api/inventory/status", (_req, res) => {
+  const totalParts = tataPartsData.parts.length;
+  const inStock = tataPartsData.parts.filter(p => p.inventory.quantity > 10).length;
+  const lowStock = tataPartsData.parts.filter(p => p.inventory.quantity > 0 && p.inventory.quantity <= 10).length;
+  const outOfStock = tataPartsData.parts.filter(p => p.inventory.quantity === 0).length;
+  const featuredParts = tataPartsData.parts.filter(p => p.criticality === 'Critical' || p.criticality === 'High').length;
+  
   res.json({
-    totalParts: 500,
-    inStock: 400,
-    outOfStock: 50,
-    lowStock: 50,
-    featuredParts: 25,
-    lastUpdate: new Date().toISOString()
+    totalParts,
+    inStock,
+    outOfStock,
+    lowStock,
+    featuredParts,
+    lastUpdate: new Date().toISOString(),
+    company: "Tata Industries",
+    categories: tataPartsData.categories.length
   });
 });
 
-// Parts endpoint
-app.get("/api/parts", (_req, res) => {
-  res.json([
-    { id: 1, name: "Engine Filter", quantity: 50, featured: true },
-    { id: 2, name: "Brake Pad", quantity: 30, featured: false },
-    { id: 3, name: "Oil Filter", quantity: 100, featured: true }
-  ]);
+// Parts endpoint with Tata Industries data
+app.get("/api/parts", (req, res) => {
+  const { category, search, featured } = req.query;
+  let parts = tataPartsData.parts;
+
+  // Filter by category
+  if (category) {
+    parts = parts.filter(part => part.category === category);
+  }
+
+  // Filter by search term
+  if (search) {
+    const searchTerm = search.toLowerCase();
+    parts = parts.filter(part => 
+      part.name.toLowerCase().includes(searchTerm) ||
+      part.partNumber.toLowerCase().includes(searchTerm) ||
+      part.description.toLowerCase().includes(searchTerm)
+    );
+  }
+
+  // Filter featured parts
+  if (featured === 'true') {
+    parts = parts.filter(part => part.criticality === 'Critical' || part.criticality === 'High');
+  }
+
+  res.json({
+    parts: parts.map(part => ({
+      id: part.id,
+      name: part.name,
+      partNumber: part.partNumber,
+      category: part.category,
+      description: part.description,
+      quantity: part.inventory.quantity,
+      location: part.inventory.location,
+      price: part.pricing.unitPrice,
+      currency: part.pricing.currency,
+      criticality: part.criticality,
+      featured: part.criticality === 'Critical' || part.criticality === 'High'
+    })),
+    total: parts.length,
+    categories: tataPartsData.categories
+  });
 });
 
 // User search
