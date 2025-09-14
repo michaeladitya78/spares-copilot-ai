@@ -91,7 +91,7 @@ export function SparesChat() {
           sender: 'bot',
           timestamp: new Date(),
           type: 'text'
-        });
+        }]);
         setIsLoading(false);
       }
     };
@@ -436,13 +436,6 @@ export function SparesChat() {
     setChatState("welcome");
     setShowFileUpload(false);
     setIsLoading(false);
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
   };
 
   return (
