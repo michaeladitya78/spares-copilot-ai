@@ -497,15 +497,15 @@ app.get("/api/docs", (_req, res) => {
 });
 
 // Serve static files from dist
-app.use(express.static('dist'));
+app.use(express.static(path.resolve(__dirname, '../dist')));
 
 // Serve the React app for root and bot routes
 app.get('/', (req, res) => {
-  res.sendFile(path.resolve('dist/index.html'));
+  res.sendFile(path.resolve(__dirname, '../dist/index.html'));
 });
 
 app.get('/bot', (req, res) => {
-  res.sendFile(path.resolve('dist/index.html'));
+  res.sendFile(path.resolve(__dirname, '../dist/index.html'));
 });
 
 // Error handling middleware
@@ -519,7 +519,11 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, (err) => {
+  if (err) {
+    console.error('❌ Failed to start server:', err);
+    process.exit(1);
+  }
   console.log(`🚀 Synapse AI Server running on http://localhost:${PORT}`);
   console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
   console.log(`🤖 Bot interface: http://localhost:${PORT}/bot`);
@@ -528,7 +532,12 @@ const server = app.listen(PORT, () => {
 });
 
 // Initialize WebSocket server
-wsService.initialize(server);
+try {
+  wsService.initialize(server);
+  console.log('✅ WebSocket server initialized successfully');
+} catch (error) {
+  console.error('❌ WebSocket initialization failed:', error);
+}
 
 // Graceful shutdown
 function shutdown() {
