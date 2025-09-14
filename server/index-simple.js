@@ -30,7 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 });
 app.use(limiter);
 
-const PORT = process.env.PORT || 8787;
+const PORT = process.env.PORT || 8788;
 
 // API versioning
 app.use((req, res, next) => {
