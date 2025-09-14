@@ -15,8 +15,10 @@ import {
   Copy
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PartFeatureMarker } from "@/components/part-feature-marker";
 
 interface PartData {
+  id?: string;
   partNumber: string;
   name: string;
   machine: string;
@@ -25,6 +27,9 @@ interface PartData {
   warranty: boolean;
   warrantyDate: string | null;
   imageUrl?: string | null;
+  isFeatured?: boolean;
+  location?: string;
+  features?: string[];
 }
 
 interface SynapseResultCardProps {
@@ -37,6 +42,8 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
   ({ partData, className, animationDelay = 0 }, ref) => {
     const [isVisible, setIsVisible] = React.useState(false);
     const [copied, setCopied] = React.useState(false);
+    const [isRequesting, setIsRequesting] = React.useState(false);
+    const [requestSuccess, setRequestSuccess] = React.useState(false);
 
     React.useEffect(() => {
       const timer = setTimeout(() => {
@@ -45,6 +52,101 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
 
       return () => clearTimeout(timer);
     }, [animationDelay]);
+
+    const handleRequestPart = async () => {
+      if (!partData.id) return;
+      
+      setIsRequesting(true);
+      try {
+        const response = await fetch(`/api/parts/${partData.id}/request`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setRequestSuccess(true);
+          setTimeout(() => setRequestSuccess(false), 3000);
+        }
+      } catch (error) {
+        console.error('Request part error:', error);
+      } finally {
+        setIsRequesting(false);
+      }
+    };
+
+    const handleViewDetails = () => {
+      // Create a detailed view in a new window or modal
+      const detailsWindow = window.open('', '_blank', 'width=600,height=800');
+      if (detailsWindow) {
+        detailsWindow.document.write(`
+          <html>
+            <head>
+              <title>Part Details - ${partData.partNumber}</title>
+              <style>
+                body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+                .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                .header { border-bottom: 2px solid #0ea5e9; padding-bottom: 15px; margin-bottom: 20px; }
+                .part-number { font-family: monospace; background: #f1f5f9; padding: 4px 8px; border-radius: 4px; }
+                .section { margin: 15px 0; }
+                .label { font-weight: bold; color: #475569; }
+                .status { padding: 4px 8px; border-radius: 4px; color: white; font-size: 12px; }
+                .in-stock { background: #10b981; }
+                .out-stock { background: #ef4444; }
+                .warranty { background: #0ea5e9; }
+                .no-warranty { background: #6b7280; }
+              </style>
+            </head>
+            <body>
+              <div class="container">
+                <div class="header">
+                  <h1>${partData.name}</h1>
+                  <p class="part-number">${partData.partNumber}</p>
+                </div>
+                
+                <div class="section">
+                  <div class="label">Machine:</div>
+                  <div>${partData.machine}</div>
+                </div>
+                
+                <div class="section">
+                  <div class="label">Location:</div>
+                  <div>${partData.location || 'Site A'}</div>
+                </div>
+                
+                <div class="section">
+                  <div class="label">Inventory Status:</div>
+                  <span class="status ${partData.inStock ? 'in-stock' : 'out-stock'}">
+                    ${partData.inStock ? `${partData.quantity} in stock` : 'Out of stock'}
+                  </span>
+                </div>
+                
+                <div class="section">
+                  <div class="label">Warranty Status:</div>
+                  <span class="status ${partData.warranty ? 'warranty' : 'no-warranty'}">
+                    ${partData.warranty ? `Active until ${partData.warrantyDate}` : 'No warranty'}
+                  </span>
+                </div>
+                
+                ${partData.features && partData.features.length > 0 ? `
+                  <div class="section">
+                    <div class="label">Features:</div>
+                    <ul>
+                      ${partData.features.map(feature => `<li>${feature}</li>`).join('')}
+                    </ul>
+                  </div>
+                ` : ''}
+                
+                <div class="section" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                  <small style="color: #64748b;">Generated by Synapse AI</small>
+                </div>
+              </div>
+            </body>
+          </html>
+        `);
+        detailsWindow.document.close();
+      }
+    };
 
     if (!isVisible) return null;
 
@@ -202,15 +304,32 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
           </div>
         </Card>
 
+        {/* Feature Marker */}
+        <div className="flex justify-center pt-2 animate-fade-in-up">
+          <PartFeatureMarker partData={partData} />
+        </div>
+
         {/* Action Buttons */}
         <div className="flex gap-3 pt-2 animate-fade-in-up">
           <Button 
             variant="default" 
             className="flex-1 bg-gradient-to-r from-primary to-synapse-blue-dark hover:from-synapse-blue-dark hover:to-primary"
+            onClick={handleRequestPart}
+            disabled={isRequesting || !partData.inStock}
           >
-            Request Part
+            {isRequesting ? (
+              "Requesting..."
+            ) : requestSuccess ? (
+              "✓ Requested"
+            ) : (
+              "Request Part"
+            )}
           </Button>
-          <Button variant="outline" className="flex-1 border-primary/20 text-primary hover:bg-synapse-blue-light">
+          <Button 
+            variant="outline" 
+            className="flex-1 border-primary/20 text-primary hover:bg-synapse-blue-light"
+            onClick={handleViewDetails}
+          >
             View Details
           </Button>
         </div>

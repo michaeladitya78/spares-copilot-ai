@@ -4,13 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SynapseHeader } from "@/components/synapse-header";
 import { SynapseWelcome } from "@/components/synapse-welcome";
 import { SynapseResultCard } from "@/components/synapse-result-card";
 import { SynapseLoading } from "@/components/synapse-loading";
 import { FileUpload } from "@/components/ui/file-upload";
 import { CameraCapture } from "@/components/ui/camera-capture";
-import { Send, Paperclip, RotateCcw } from "lucide-react";
+import { InventoryStatusWidget } from "@/components/inventory-status-widget";
+import { Send, Paperclip, RotateCcw, Bot, Database, Upload, Search, Settings, Zap, Users, Image, MessageSquare, Wifi, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -22,40 +25,25 @@ interface Message {
   data?: any;
 }
 
+interface BotStats {
+  totalUsers: number;
+  totalParts: number;
+  activeConnections: number;
+  wsClients: number;
+  lastUpdate: string;
+}
+
+interface WebSocketMessage {
+  type: string;
+  message?: string;
+  data?: any;
+  timestamp: string;
+}
+
 type ChatState = "welcome" | "chatting";
 
-const mockParts = [
-  {
-    partNumber: "BRG-X75-001",
-    name: "Bearing Model X-75",
-    machine: "Assembly Line A",
-    inStock: true,
-    quantity: 4,
-    warranty: true,
-    warrantyDate: "October 2026",
-    imageUrl: "/placeholder.svg"
-  },
-  {
-    partNumber: "MTR-V200-002",
-    name: "Motor Drive V200",
-    machine: "Packaging Unit B",
-    inStock: false,
-    quantity: 0,
-    warranty: true,
-    warrantyDate: "March 2025",
-    imageUrl: "/placeholder.svg"
-  },
-  {
-    partNumber: "SEN-P450-003",
-    name: "Proximity Sensor P450",
-    machine: "Quality Control Station",
-    inStock: true,
-    quantity: 12,
-    warranty: false,
-    warrantyDate: null,
-    imageUrl: "/placeholder.svg"
-  }
-];
+// Database-driven parts will be fetched from API
+let cachedParts: any[] = [];
 
 export function SparesChat() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -66,8 +54,95 @@ export function SparesChat() {
   const [loadingType, setLoadingType] = useState<"image" | "text">("text");
   const [uploadPreview, setUploadPreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [wsConnected, setWsConnected] = useState(false);
+  const [botStats, setBotStats] = useState<BotStats | null>(null);
+  const [activeTab, setActiveTab] = useState('chat');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const wsRef = useRef<WebSocket | null>(null);
+
+  // Initialize WebSocket connection
+  useEffect(() => {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    
+    wsRef.current = new WebSocket(wsUrl);
+    
+    wsRef.current.onopen = () => {
+      setWsConnected(true);
+      console.log('🔌 WebSocket connected to Synapse');
+      
+      // Subscribe to inventory updates
+      wsRef.current?.send(JSON.stringify({
+        type: 'subscribe',
+        channel: 'inventory'
+      }));
+    };
+    
+    wsRef.current.onmessage = (event) => {
+      const message: WebSocketMessage = JSON.parse(event.data);
+      
+      if (message.type === 'chat_response') {
+        setMessages(prev => [...prev, {
+          id: Date.now().toString(),
+          content: message.message || '',
+          sender: 'bot',
+          timestamp: new Date(),
+          type: 'text'
+        });
+        setIsLoading(false);
+      }
+    };
+    
+    wsRef.current.onclose = () => {
+      setWsConnected(false);
+      console.log('🔌 WebSocket disconnected');
+    };
+    
+    wsRef.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      setWsConnected(false);
+    };
+
+    return () => {
+      wsRef.current?.close();
+    };
+  }, []);
+
+  // Load bot stats
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const response = await fetch('/api/enterprise/stats');
+        const stats = await response.json();
+        setBotStats(stats);
+      } catch (error) {
+        console.error('Failed to load stats:', error);
+      }
+    };
+    
+    loadStats();
+    const interval = setInterval(loadStats, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Load parts from database on component mount
+  useEffect(() => {
+    const loadParts = async () => {
+      try {
+        const response = await fetch('/api/parts');
+        if (response.ok) {
+          const data = await response.json();
+          cachedParts = data;
+        }
+      } catch (error) {
+        console.error('Failed to load parts:', error);
+      }
+    };
+    loadParts();
+  }, []);
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
@@ -126,26 +201,64 @@ export function SparesChat() {
     }
 
     let partData;
+    if (cachedParts.length === 0) {
+      // Fallback to loading parts if not cached
+      try {
+        const response = await fetch('/api/parts');
+        if (response.ok) {
+          const data = await response.json();
+          cachedParts = data.parts;
+        }
+      } catch (error) {
+        console.error('Failed to load parts:', error);
+      }
+    }
+
     if (isImageUpload) {
-      partData = mockParts[Math.floor(Math.random() * mockParts.length)];
+      partData = cachedParts[Math.floor(Math.random() * cachedParts.length)];
     } else if (userMessage.toLowerCase().includes('bearing') || userMessage.toLowerCase().includes('x-75')) {
-      partData = mockParts[0];
+      partData = cachedParts.find(p => p.partNumber === "BRG-X75-001") || cachedParts[0];
     } else if (userMessage.toLowerCase().includes('motor') || userMessage.toLowerCase().includes('v200')) {
-      partData = mockParts[1];
+      partData = cachedParts.find(p => p.partNumber === "MTR-V200-002") || cachedParts[1];
     } else if (userMessage.toLowerCase().includes('sensor') || userMessage.toLowerCase().includes('p450')) {
-      partData = mockParts[2];
+      partData = cachedParts.find(p => p.partNumber === "SEN-P450-003") || cachedParts[2];
     } else {
-      const options = [mockParts[0], mockParts[2]];
-      const disambiguation: Message = {
-        id: Date.now().toString(),
-        content: "I found a couple of possibilities. Which one looks correct?",
-        sender: "bot",
-        timestamp: new Date(),
-        type: "result",
-        data: { disambiguate: true, options }
-      };
-      setMessages(prev => [...prev, disambiguation]);
-      return;
+      // Search for parts and show disambiguation if multiple found
+      const searchResults = cachedParts.filter(part => 
+        part.name.toLowerCase().includes(userMessage.toLowerCase()) ||
+        part.partNumber.toLowerCase().includes(userMessage.toLowerCase()) ||
+        part.machine.toLowerCase().includes(userMessage.toLowerCase())
+      );
+
+      if (searchResults.length > 1) {
+        const options = searchResults.slice(0, 3); // Show top 3 results
+        const disambiguation: Message = {
+          id: Date.now().toString(),
+          content: "I found several possibilities. Which one looks correct?",
+          sender: "bot",
+          timestamp: new Date(),
+          type: "result",
+          data: { disambiguate: true, options }
+        };
+        setMessages(prev => [...prev, disambiguation]);
+        return;
+      } else if (searchResults.length === 1) {
+        partData = searchResults[0];
+      } else {
+        // No matches found, show a random part with a message
+        partData = cachedParts[0] || null;
+        if (!partData) {
+          const errorMessage: Message = {
+            id: Date.now().toString(),
+            content: "I couldn't find any matching parts. Please try a different description or part number.",
+            sender: "bot",
+            timestamp: new Date(),
+            type: "text"
+          };
+          setMessages(prev => [...prev, errorMessage]);
+          return;
+        }
+      }
     }
 
     const response: Message = {
@@ -174,8 +287,15 @@ export function SparesChat() {
     setShowFileUpload(true);
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
   const handleSendMessage = async () => {
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -190,8 +310,47 @@ export function SparesChat() {
     const messageText = inputValue;
     setInputValue("");
     setShowFileUpload(false);
+    setIsLoading(true);
 
-    await generateBotResponse(messageText);
+    // Try WebSocket first, fallback to HTTP API
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({
+        type: 'chat',
+        content: messageText,
+        sessionId: 'synapse_session'
+      }));
+    } else {
+      // Fallback to HTTP API
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: messageText, sessionId: 'synapse_session' })
+        });
+        const data = await response.json();
+        
+        const botMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: data.response,
+          sender: "bot",
+          timestamp: new Date(),
+          type: "text"
+        };
+        setMessages(prev => [...prev, botMessage]);
+        setIsLoading(false);
+      } catch (error) {
+        console.error('Chat error:', error);
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: "Sorry, I'm having trouble connecting. Please try again.",
+          sender: "bot",
+          timestamp: new Date(),
+          type: "text"
+        };
+        setMessages(prev => [...prev, errorMessage]);
+        setIsLoading(false);
+      }
+    }
   };
 
   const handleFileUpload = async (file: File) => {
@@ -291,6 +450,35 @@ export function SparesChat() {
       {/* Synapse Header */}
       <SynapseHeader />
 
+      {/* WebSocket Status Indicator */}
+      <div className="px-4 py-2 border-b bg-synapse-gray-light/30">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Badge variant={wsConnected ? "default" : "destructive"} className="text-xs">
+              {wsConnected ? (
+                <>
+                  <Wifi className="h-3 w-3 mr-1" />
+                  Real-time Connected
+                </>
+              ) : (
+                <>
+                  <WifiOff className="h-3 w-3 mr-1" />
+                  HTTP Mode
+                </>
+              )}
+            </Badge>
+            {botStats && (
+              <span className="text-xs text-muted-foreground">
+                {botStats.totalParts} parts • {botStats.wsClients} connections
+              </span>
+            )}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Synapse AI Bot v1.0
+          </div>
+        </div>
+      </div>
+
       {/* Main Content Area */}
       <div className="flex-1 overflow-hidden">
         {chatState === "welcome" ? (
@@ -301,6 +489,9 @@ export function SparesChat() {
         ) : (
           <ScrollArea ref={scrollAreaRef} className="h-full">
             <div className="p-4 space-y-4">
+              {/* Inventory Status Widget */}
+              <InventoryStatusWidget className="mb-4" />
+              
               {messages.map((message) => {
                 if (message.type === "result" && message.data) {
                   if (message.data.disambiguate && message.data.options) {

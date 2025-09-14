@@ -1,0 +1,416 @@
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import compression from "compression";
+import morgan from "morgan";
+import rateLimit from "express-rate-limit";
+import dotenv from "dotenv";
+import { WebSocketServer } from 'ws';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config();
+
+const app = express();
+app.use(helmet());
+app.use(cors());
+app.use(compression());
+app.use(morgan('combined'));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
+
+// Rate limiting
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 });
+app.use(limiter);
+
+const PORT = process.env.PORT || 8787;
+
+// API versioning
+app.use((req, res, next) => {
+  res.setHeader('X-API-Version', 'v1');
+  next();
+});
+
+// Simple WebSocket service
+class SimpleWebSocketService {
+  constructor() {
+    this.clients = new Map();
+  }
+
+  initialize(server) {
+    this.wss = new WebSocketServer({ 
+      server,
+      path: '/ws'
+    });
+
+    this.wss.on('connection', (ws, req) => {
+      const clientId = this.generateClientId();
+      this.clients.set(clientId, {
+        ws,
+        id: clientId,
+        connectedAt: new Date(),
+        subscriptions: new Set()
+      });
+
+      console.log(`🔌 WebSocket client connected: ${clientId}`);
+
+      // Send welcome message
+      ws.send(JSON.stringify({
+        type: 'connection',
+        clientId,
+        message: 'Connected to Synapse WebSocket',
+        timestamp: new Date().toISOString()
+      }));
+
+      ws.on('message', (data) => {
+        try {
+          const message = JSON.parse(data);
+          this.handleMessage(clientId, message);
+        } catch (error) {
+          ws.send(JSON.stringify({
+            type: 'error',
+            message: 'Invalid JSON message',
+            timestamp: new Date().toISOString()
+          }));
+        }
+      });
+
+      ws.on('close', () => {
+        console.log(`🔌 WebSocket client disconnected: ${clientId}`);
+        this.clients.delete(clientId);
+      });
+
+      ws.on('error', (error) => {
+        console.error(`WebSocket error for client ${clientId}:`, error);
+        this.clients.delete(clientId);
+      });
+    });
+
+    console.log('🔌 WebSocket server initialized on /ws');
+  }
+
+  generateClientId() {
+    return `client_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  handleMessage(clientId, message) {
+    const client = this.clients.get(clientId);
+    if (!client) return;
+
+    switch (message.type) {
+      case 'subscribe':
+        this.handleSubscribe(clientId, message.channel);
+        break;
+      case 'unsubscribe':
+        this.handleUnsubscribe(clientId, message.channel);
+        break;
+      case 'ping':
+        this.sendToClient(clientId, { type: 'pong', timestamp: new Date().toISOString() });
+        break;
+      case 'chat':
+        this.handleChatMessage(clientId, message);
+        break;
+      default:
+        this.sendToClient(clientId, {
+          type: 'error',
+          message: `Unknown message type: ${message.type}`,
+          timestamp: new Date().toISOString()
+        });
+    }
+  }
+
+  handleSubscribe(clientId, channel) {
+    const client = this.clients.get(clientId);
+    if (client && channel) {
+      client.subscriptions.add(channel);
+      this.sendToClient(clientId, {
+        type: 'subscribed',
+        channel,
+        message: `Subscribed to ${channel}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  handleUnsubscribe(clientId, channel) {
+    const client = this.clients.get(clientId);
+    if (client && channel) {
+      client.subscriptions.delete(channel);
+      this.sendToClient(clientId, {
+        type: 'unsubscribed',
+        channel,
+        message: `Unsubscribed from ${channel}`,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  handleChatMessage(clientId, message) {
+    // Simple echo response
+    this.sendToClient(clientId, {
+      type: 'chat_response',
+      message: `Echo: ${message.content || 'Hello!'}`,
+      sessionId: message.sessionId || 'ws_session',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  sendToClient(clientId, data) {
+    const client = this.clients.get(clientId);
+    if (client && client.ws.readyState === 1) { // WebSocket.OPEN = 1
+      client.ws.send(JSON.stringify(data));
+    }
+  }
+
+  broadcastToChannel(channel, data) {
+    this.clients.forEach((client, clientId) => {
+      if (client.subscriptions.has(channel)) {
+        this.sendToClient(clientId, {
+          type: 'broadcast',
+          channel,
+          data,
+          timestamp: new Date().toISOString()
+        });
+      }
+    });
+  }
+
+  getConnectedClients() {
+    return Array.from(this.clients.values()).map(client => ({
+      id: client.id,
+      connectedAt: client.connectedAt,
+      subscriptions: Array.from(client.subscriptions)
+    }));
+  }
+
+  getStats() {
+    return {
+      totalClients: this.clients.size,
+      clients: this.getConnectedClients()
+    };
+  }
+}
+
+// Initialize WebSocket service
+const wsService = new SimpleWebSocketService();
+
+// Health check
+app.get("/api/health", (_req, res) => {
+  res.json({ 
+    status: "ok", 
+    timestamp: new Date().toISOString(),
+    version: "1.0.0",
+    mode: "simple",
+    websocket: "enabled"
+  });
+});
+
+// Chat endpoint
+app.post("/api/chat", (req, res) => {
+  const { message } = req.body;
+  res.json({
+    response: `AI Response: ${message || 'Hello! This is Synapse AI Bot.'}`,
+    sessionId: 'simple_session',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Enterprise stats
+app.get("/api/enterprise/stats", (_req, res) => {
+  res.json({
+    totalUsers: 1000,
+    totalParts: 500,
+    activeConnections: wsService.clients.size,
+    wsClients: wsService.clients.size,
+    lastUpdate: new Date().toISOString(),
+    mode: "simple"
+  });
+});
+
+// Inventory status
+app.get("/api/inventory/status", (_req, res) => {
+  res.json({
+    totalParts: 500,
+    inStock: 400,
+    outOfStock: 50,
+    lowStock: 50,
+    featuredParts: 25,
+    lastUpdate: new Date().toISOString()
+  });
+});
+
+// Parts endpoint
+app.get("/api/parts", (_req, res) => {
+  res.json([
+    { id: 1, name: "Engine Filter", quantity: 50, featured: true },
+    { id: 2, name: "Brake Pad", quantity: 30, featured: false },
+    { id: 3, name: "Oil Filter", quantity: 100, featured: true }
+  ]);
+});
+
+// User search
+app.get("/api/users/search", (req, res) => {
+  const { q } = req.query;
+  res.json({
+    users: [
+      { name: "John Doe", email: "john@example.com", department: "Engineering" },
+      { name: "Jane Smith", email: "jane@example.com", department: "Sales" }
+    ],
+    query: q || '',
+    total: 2
+  });
+});
+
+// WebSocket stats
+app.get("/api/websocket/stats", (_req, res) => {
+  res.json(wsService.getStats());
+});
+
+// Scaling profiles
+app.get("/api/scaling/profiles", (_req, res) => {
+  res.json({
+    profiles: [
+      { name: "small", maxRows: 1000, batchSize: 100 },
+      { name: "medium", maxRows: 100000, batchSize: 1000 },
+      { name: "large", maxRows: 10000000, batchSize: 10000 }
+    ]
+  });
+});
+
+// Image upload (mock)
+app.post("/api/images/upload", (req, res) => {
+  res.json({
+    success: true,
+    image: {
+      filename: "uploaded-image.jpg",
+      size: 1024000,
+      mimetype: "image/jpeg",
+      uploadedAt: new Date().toISOString(),
+      ocrText: "Sample OCR text from uploaded image",
+      hints: { sizeBytes: 1024000, available: true }
+    }
+  });
+});
+
+// Enterprise import (mock)
+app.post("/api/users/import/enterprise", (req, res) => {
+  res.json({
+    jobId: "import-" + Date.now(),
+    status: "processing",
+    message: "Import started successfully"
+  });
+});
+
+// Import status
+app.get("/api/users/import/:id/status", (req, res) => {
+  res.json({
+    id: req.params.id,
+    status: "completed",
+    progress: 100,
+    totalRows: 1000,
+    processedRows: 1000,
+    errors: []
+  });
+});
+
+// SSE events
+app.get("/api/events", (req, res) => {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream',
+    'Cache-Control': 'no-cache',
+    'Connection': 'keep-alive',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Cache-Control'
+  });
+
+  res.write('data: {"type":"connected","message":"SSE connected"}\n\n');
+
+  const interval = setInterval(() => {
+    res.write(`data: {"type":"heartbeat","timestamp":"${new Date().toISOString()}"}\n\n`);
+  }, 30000);
+
+  req.on('close', () => {
+    clearInterval(interval);
+  });
+});
+
+// API documentation
+app.get("/api/docs", (_req, res) => {
+  res.json({
+    title: "Synapse AI API",
+    version: "1.0.0",
+    description: "Complete API with WebSocket support",
+    endpoints: [
+      "GET /api/health - Health check",
+      "POST /api/chat - Chat with AI",
+      "GET /api/enterprise/stats - System statistics",
+      "GET /api/inventory/status - Inventory status",
+      "GET /api/parts - Parts list",
+      "GET /api/users/search - User search",
+      "GET /api/websocket/stats - WebSocket statistics",
+      "GET /api/scaling/profiles - Scaling profiles",
+      "POST /api/images/upload - Image upload",
+      "POST /api/users/import/enterprise - Enterprise import",
+      "GET /api/events - Server-sent events",
+      "WebSocket /ws - Real-time communication"
+    ],
+    websocket: {
+      url: `ws://localhost:${PORT}/ws`,
+      messageTypes: ["subscribe", "unsubscribe", "ping", "chat"],
+      channels: ["inventory", "import", "chat"]
+    }
+  });
+});
+
+// Serve static files from dist
+app.use(express.static('dist'));
+
+// Serve the React app for root and bot routes
+app.get('/', (req, res) => {
+  res.sendFile(path.resolve('dist/index.html'));
+});
+
+app.get('/bot', (req, res) => {
+  res.sendFile(path.resolve('dist/index.html'));
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  const status = err.status || 500;
+  res.status(status).json({ 
+    error: status === 500 ? 'Internal Server Error' : err.message,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Start server
+const server = app.listen(PORT, () => {
+  console.log(`🚀 Synapse AI Server running on http://localhost:${PORT}`);
+  console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
+  console.log(`🤖 Bot interface: http://localhost:${PORT}/bot`);
+  console.log(`📚 API docs: http://localhost:${PORT}/api/docs`);
+  console.log(`🔌 WebSocket: ws://localhost:${PORT}/ws`);
+});
+
+// Initialize WebSocket server
+wsService.initialize(server);
+
+// Graceful shutdown
+function shutdown() {
+  console.log('🔻 Graceful shutdown initiated');
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
+  setTimeout(() => {
+    console.error('Force exit after timeout');
+    process.exit(1);
+  }, 30000);
+}
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);

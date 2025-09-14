@@ -7,6 +7,8 @@ import { Analytics } from "@vercel/analytics/react";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import TeamsConfig from "./pages/TeamsConfig";
+import { Admin } from "./pages/Admin";
+import SynapseBot from "./components/synapse-bot";
 
 const queryClient = new QueryClient();
 
@@ -19,6 +21,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/teams-config" element={<TeamsConfig />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/bot" element={<SynapseBot />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

@@ -1,0 +1,168 @@
+version: '3.8'
+
+services:
+  # PostgreSQL database with pgvector extension
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: synapse_ai
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d synapse_ai"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - synapse-network
+
+  # Ollama for local AI models
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    restart: unless-stopped
+    networks:
+      - synapse-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    # If no GPU available, remove the deploy section above
+
+  # Redis for caching and background jobs
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - synapse-network
+
+  # API Server
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - "8787:8787"
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=synapse_ai
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - OLLAMA_HOST=http://ollama:11434
+      - REDIS_URL=redis://redis:6379
+      - LOCAL_CHAT_MODEL=llama3.2:3b
+      - LOCAL_EMBEDDING_MODEL=all-MiniLM-L6-v2
+      # Teams Bot Configuration
+      - MICROSOFT_APP_ID=${MICROSOFT_APP_ID}
+      - MICROSOFT_APP_PASSWORD=${MICROSOFT_APP_PASSWORD}
+      - MICROSOFT_APP_TYPE=${MICROSOFT_APP_TYPE:-MultiTenant}
+      - MICROSOFT_APP_TENANT_ID=${MICROSOFT_APP_TENANT_ID}
+      # External API keys (optional - for hybrid mode)
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./uploads:/app/uploads
+      - ./training_data:/app/training_data
+      - api_logs:/app/logs
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+      redis:
+        condition: service_started
+    restart: unless-stopped
+    networks:
+      - synapse-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8787/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Web Frontend
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "3000:80"
+    environment:
+      - API_URL=http://api:8787
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - synapse-network
+
+  # Nginx reverse proxy (optional, for production)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl/certs:ro
+    depends_on:
+      - web
+      - api
+    restart: unless-stopped
+    networks:
+      - synapse-network
+    profiles:
+      - production
+
+  # Model initialization service
+  model-init:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - LOCAL_CHAT_MODEL=llama3.2:3b
+    volumes:
+      - ./scripts:/app/scripts
+    depends_on:
+      - ollama
+    networks:
+      - synapse-network
+    command: node scripts/pull-models.js
+    restart: "no"
+    profiles:
+      - init
+
+volumes:
+  postgres_data:
+    driver: local
+  ollama_data:
+    driver: local
+  redis_data:
+    driver: local
+  api_logs:
+    driver: local
+
+networks:
+  synapse-network:
+    driver: bridge
