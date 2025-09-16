@@ -13,7 +13,7 @@ import { SynapseLoading } from "@/components/synapse-loading";
 import { FileUpload } from "@/components/ui/file-upload";
 import { CameraCapture } from "@/components/ui/camera-capture";
 import { InventoryStatusWidget } from "@/components/inventory-status-widget";
-import { Send, Paperclip, RotateCcw, Bot, Database, Upload, Search, Settings, Zap, Users, Image, MessageSquare, Wifi, WifiOff } from "lucide-react";
+import { Send, Paperclip, RotateCcw, Bot, Database, Upload, Settings, Zap, Users, Image, MessageSquare, Wifi, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Message {
@@ -65,6 +65,7 @@ export function SparesChat() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [selectedPart, setSelectedPart] = useState<any | null>(null);
+  const [requestingId, setRequestingId] = useState<string | null>(null);
   // Component refs for DOM access
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -140,7 +141,7 @@ export function SparesChat() {
         const response = await fetch('/api/parts');
         if (response.ok) {
           const data = await response.json();
-          cachedParts = data;
+          cachedParts = Array.isArray(data) ? data : (data.parts || []);
         }
       } catch (error) {
         console.error('Failed to load parts:', error);
@@ -212,23 +213,17 @@ export function SparesChat() {
     }
 
     try {
-      if (userMessage.trim() || imageData) {
-        const body: any = { messages: [{ role: 'user', content: userMessage || 'Identify this part' }] };
-        if (imageData) {
-          body.image = imageData;
-        }
-
-        const res = await fetch('/api/ask', {
+      if (userMessage.trim()) {
+        const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
+          body: JSON.stringify({ message: userMessage, sessionId: 'synapse_session' })
         });
-        
         if (res.ok) {
           const data = await res.json();
           const response: Message = {
             id: Date.now().toString(),
-            content: data.text || 'No response',
+            content: data.response || data.text || 'No response',
             sender: 'bot',
             timestamp: new Date(),
             type: 'text'
@@ -247,7 +242,7 @@ export function SparesChat() {
         const response = await fetch('/api/parts');
         if (response.ok) {
           const data = await response.json();
-          cachedParts = data.parts;
+          cachedParts = Array.isArray(data) ? data : (data.parts || []);
         }
       } catch (error) {
         console.error('Failed to load parts:', error);
@@ -364,6 +359,46 @@ export function SparesChat() {
     }
   };
 
+  // Search handler for parts grid (also used by chat submissions)
+  const handleSearch = async (termInput?: string) => {
+    const term = (termInput ?? searchQuery).trim();
+    if (!term) {
+      setSearchResults([]);
+      return;
+    }
+    try {
+      const response = await fetch(`/api/parts?search=${encodeURIComponent(term)}`);
+      if (!response.ok) return;
+      const data = await response.json();
+      const parts = Array.isArray(data) ? data : (data.parts || []);
+      setSearchResults(parts);
+    } catch (err) {
+      console.error('Search failed:', err);
+    }
+  };
+
+  // Request a part and sync UI state
+  const handleRequestPart = async (part: any) => {
+    if (!part?.id) return;
+    setRequestingId(part.id);
+    try {
+      const res = await fetch(`/api/parts/${part.id}/request`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+      if (res.ok) {
+        const data = await res.json();
+        // update results
+        setSearchResults(prev => prev.map(p => p.id === part.id ? { ...p, quantity: data.newQuantity, inStock: data.newQuantity > 0 } : p));
+        // update any message result payloads
+        setMessages(prev => prev.map(m => (m.type === 'result' && m.data?.id === part.id) ? { ...m, data: { ...m.data, quantity: data.newQuantity, inStock: data.newQuantity > 0 } } : m));
+        // update modal
+        setSelectedPart(prev => prev && prev.id === part.id ? { ...prev, quantity: data.newQuantity, inStock: data.newQuantity > 0 } : prev);
+      }
+    } catch (e) {
+      console.error('Request part failed:', e);
+    } finally {
+      setRequestingId(null);
+    }
+  };
+
   const handleSendMessage = async () => {
     // Don't send empty messages or when already processing
     if (!inputValue.trim() || isLoading) return;
@@ -384,6 +419,19 @@ export function SparesChat() {
     setInputValue("");
     setShowFileUpload(false);
     setIsLoading(true);
+
+    // If it's a parts-specific query, show cards only and suppress text response
+    if (isSparePartsQuery(messageText)) {
+      try {
+        await handleSearch(messageText);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    } else {
+      // Otherwise still search to be helpful, but allow text response too
+      handleSearch(messageText);
+    }
 
     // Try WebSocket first, fallback to HTTP API
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -570,9 +618,50 @@ export function SparesChat() {
             <div className="flex flex-col gap-4">
               {/* Inventory Status Widget */}
               <InventoryStatusWidget className="mb-4" />
+
+              {/* Search UI merged into chat; removed standalone search bar */}
               
               {messages.map((message) => {
                 if (message.type === "result" && message.data) {
+                  // Disambiguation grid when multiple options are suggested
+                  if (message.data.disambiguate && Array.isArray(message.data.options)) {
+                    const options = message.data.options as any[];
+                    return (
+                      <div key={message.id} className="max-w-3xl w-full mx-auto">
+                        <div className="px-1 text-sm text-muted-foreground mb-2">I found several matching parts. Select one to view details:</div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {options.map((part) => (
+                            <Card key={part.partNumber} className="p-4 flex flex-col gap-2 bg-card shadow-md border-primary/10">
+                              <div className="flex items-center gap-3">
+                                {part.imageUrl && (
+                                  <img src={part.imageUrl} alt={part.name} className="w-16 h-16 object-cover rounded-md border" />
+                                )}
+                                <div className="flex-1">
+                                  <div className="font-semibold text-lg text-primary">{part.name}</div>
+                                  <div className="text-xs text-muted-foreground">Part #: {part.partNumber}</div>
+                                  {typeof part.price !== 'undefined' && part.price !== null && (
+                                    <div className="text-sm text-success font-medium">₹{part.price}</div>
+                                  )}
+                                  <div className="text-xs mt-1">
+                                    {(typeof part.inStock !== 'undefined' ? part.inStock : (part.quantity > 0)) ? (
+                                      <Badge variant="secondary" className="text-success">In Stock</Badge>
+                                    ) : (
+                                      <Badge variant="secondary" className="text-destructive">Out of Stock</Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              <Button size="sm" className="mt-4 w-full" onClick={() => setSelectedPart(part)}>
+                                View Details
+                              </Button>
+                            </Card>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  // Single result card
                   const part = message.data;
                   return (
                     <Card key={message.id} className="p-4 flex flex-col gap-2 bg-card shadow-md border-primary/10 max-w-xl mx-auto">
@@ -583,11 +672,11 @@ export function SparesChat() {
                         <div className="flex-1">
                           <div className="font-semibold text-lg text-primary">{part.name}</div>
                           <div className="text-xs text-muted-foreground">Part #: {part.partNumber}</div>
-                          {part.price && (
+                          {typeof part.price !== 'undefined' && part.price !== null && (
                             <div className="text-sm text-success font-medium">₹{part.price}</div>
                           )}
                           <div className="text-xs mt-1">
-                            {part.inStock ? (
+                            {(typeof part.inStock !== 'undefined' ? part.inStock : (part.quantity > 0)) ? (
                               <Badge variant="secondary" className="text-success">In Stock</Badge>
                             ) : (
                               <Badge variant="secondary" className="text-destructive">Out of Stock</Badge>
@@ -648,11 +737,11 @@ export function SparesChat() {
                         <div className="flex-1">
                           <div className="font-semibold text-lg text-primary">{part.name}</div>
                           <div className="text-xs text-muted-foreground">Part #: {part.partNumber}</div>
-                          {part.price && (
+                          {typeof part.price !== 'undefined' && part.price !== null && (
                             <div className="text-sm text-success font-medium">₹{part.price}</div>
                           )}
                           <div className="text-xs mt-1">
-                            {part.inStock ? (
+                            {(typeof part.inStock !== 'undefined' ? part.inStock : (part.quantity > 0)) ? (
                               <Badge variant="secondary" className="text-success">In Stock</Badge>
                             ) : (
                               <Badge variant="secondary" className="text-destructive">Out of Stock</Badge>
@@ -660,9 +749,14 @@ export function SparesChat() {
                           </div>
                         </div>
                       </div>
-                      <Button size="sm" className="mt-4 w-full" onClick={() => handleShowDetails(part)}>
-                        View Details
-                      </Button>
+                      <div className="flex gap-2 mt-4">
+                        <Button size="sm" className="w-full" onClick={() => handleShowDetails(part)}>
+                          View Details
+                        </Button>
+                        <Button size="sm" variant="outline" className="w-full border-primary/20 text-primary" onClick={() => handleRequestPart(part)} disabled={requestingId === part.id || (typeof part.inStock !== 'undefined' ? !part.inStock : part.quantity <= 0)}>
+                          {requestingId === part.id ? 'Requesting...' : (typeof part.inStock !== 'undefined' ? (part.inStock ? 'Request Part' : 'Out of Stock') : (part.quantity > 0 ? 'Request Part' : 'Out of Stock'))}
+                        </Button>
+                      </div>
                     </Card>
                   ))}
                 </div>
