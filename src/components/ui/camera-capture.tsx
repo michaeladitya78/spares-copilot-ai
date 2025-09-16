@@ -101,16 +101,22 @@ export const CameraCapture = React.forwardRef<HTMLDivElement, CameraCaptureProps
       };
     }, [stopCamera]);
 
+    // Add: fallback UI if camera is not available
+    const isCameraSupported = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
+
     return (
       <div ref={ref} className={className}>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => setIsOpen(true)}
+          onClick={() => isCameraSupported ? setIsOpen(true) : setError('Camera not supported on this device/browser')}
           className="shrink-0 text-muted-foreground hover:text-foreground"
         >
           <Camera className="h-4 w-4" />
         </Button>
+        {!isCameraSupported && (
+          <div className="text-xs text-destructive mt-1">Camera not supported on this device/browser.</div>
+        )}
 
         <Dialog open={isOpen} onOpenChange={(open) => {
           setIsOpen(open);
