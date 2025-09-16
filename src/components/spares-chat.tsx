@@ -573,75 +573,63 @@ export function SparesChat() {
               
               {messages.map((message) => {
                 if (message.type === "result" && message.data) {
-                  if (message.data.disambiguate && message.data.options) {
-                    return (
-                      <div key={message.id} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {message.data.options.map((opt: any, idx: number) => (
-                          <div key={idx} className="space-y-2">
-                            <SynapseResultCard partData={opt} animationDelay={0} />
-                            <Button
-                              className="w-full"
-                              onClick={() => {
-                                const confirmMsg: Message = {
-                                  id: Date.now().toString(),
-                                  content: `Selected ${opt.partNumber}`,
-                                  sender: "user",
-                                  timestamp: new Date(),
-                                  type: "text"
-                                };
-                                setMessages(prev => [...prev, confirmMsg]);
-                                const confirmed: Message = {
-                                  id: (Date.now() + 1).toString(),
-                                  content: `Part identified: ${opt.name}`,
-                                  sender: "bot",
-                                  timestamp: new Date(),
-                                  type: "result",
-                                  data: opt
-                                };
-                                setMessages(prev => [...prev, confirmed]);
-                              }}
-                            >
-                              Select This Part
-                            </Button>
-                          </div>
-                        ))}
-                      </div>
-                    );
-                  }
+                  const part = message.data;
                   return (
-                    <SynapseResultCard
-                      key={message.id}
-                      partData={message.data}
-                      animationDelay={500}
-                    />
+                    <Card key={message.id} className="p-4 flex flex-col gap-2 bg-card shadow-md border-primary/10 max-w-xl mx-auto">
+                      <div className="flex items-center gap-3">
+                        {part.imageUrl && (
+                          <img src={part.imageUrl} alt={part.name} className="w-16 h-16 object-cover rounded-md border" />
+                        )}
+                        <div className="flex-1">
+                          <div className="font-semibold text-lg text-primary">{part.name}</div>
+                          <div className="text-xs text-muted-foreground">Part #: {part.partNumber}</div>
+                          {part.price && (
+                            <div className="text-sm text-success font-medium">₹{part.price}</div>
+                          )}
+                          <div className="text-xs mt-1">
+                            {part.inStock ? (
+                              <Badge variant="secondary" className="text-success">In Stock</Badge>
+                            ) : (
+                              <Badge variant="secondary" className="text-destructive">Out of Stock</Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <Button size="sm" className="mt-4 w-full" onClick={() => setSelectedPart(part)}>
+                        View Details
+                      </Button>
+                    </Card>
                   );
                 }
                 
-                return (
-                  <div
-                    key={message.id}
-                    className={cn(
-                      "flex gap-3 p-4 rounded-lg",
-                      message.sender === "user" 
-                        ? "justify-end" 
-                        : "justify-start"
-                    )}
-                  >
+                if (message.type === "text" || !message.type) {
+                  return (
                     <div
+                      key={message.id}
                       className={cn(
-                        "max-w-[80%] p-3 rounded-lg shadow-sm",
+                        "flex gap-3 p-4 rounded-lg",
                         message.sender === "user"
-                          ? "bg-primary text-primary-foreground ml-auto"
-                          : "bg-synapse-gray-light text-foreground"
+                          ? "justify-end"
+                          : "justify-start"
                       )}
                     >
-                      <p className="text-sm">{message.content}</p>
-                      <p className="text-xs mt-1 opacity-70">
-                        {message.timestamp.toLocaleTimeString()}
-                      </p>
+                      <div
+                        className={cn(
+                          "max-w-[80%] p-3 rounded-lg shadow-sm",
+                          message.sender === "user"
+                            ? "bg-primary text-primary-foreground ml-auto"
+                            : "bg-synapse-gray-light text-foreground"
+                        )}
+                      >
+                        <p className="text-sm">{message.content}</p>
+                        <p className="text-xs mt-1 opacity-70">
+                          {message.timestamp.toLocaleTimeString()}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                );
+                  );
+                }
+                return null;
               })}
               
               {isLoading && (
