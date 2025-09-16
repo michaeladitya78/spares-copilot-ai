@@ -1,0 +1,626 @@
+{
+  "company": "Tata Industries",
+  "industry": "Automation & Industrial Equipment",
+  "description": "Comprehensive spare parts database for Tata Industries automation systems",
+  "categories": [
+    {
+      "id": "bearings",
+      "name": "Bearings & Mechanical Components",
+      "description": "Industrial bearings, bushings, and mechanical components"
+    },
+    {
+      "id": "motors",
+      "name": "Motors & Drives",
+      "description": "Electric motors, drives, and control systems"
+    },
+    {
+      "id": "sensors",
+      "name": "Sensors & Detection",
+      "description": "Proximity sensors, pressure sensors, and detection equipment"
+    },
+    {
+      "id": "hydraulics",
+      "name": "Hydraulic Systems",
+      "description": "Hydraulic actuators, pumps, and control valves"
+    },
+    {
+      "id": "pneumatics",
+      "name": "Pneumatic Systems",
+      "description": "Pneumatic actuators, valves, and control systems"
+    },
+    {
+      "id": "electrical",
+      "name": "Electrical Components",
+      "description": "Electrical switches, relays, and control panels"
+    },
+    {
+      "id": "conveyors",
+      "name": "Conveyor Systems",
+      "description": "Conveyor belts, rollers, and drive systems"
+    },
+    {
+      "id": "robotics",
+      "name": "Robotics & Automation",
+      "description": "Robotic arms, controllers, and automation equipment"
+    }
+  ],
+  "parts": [
+    {
+      "id": "BEAR-X75-001",
+      "name": "Bearing X-75",
+      "category": "bearings",
+      "partNumber": "TATA-BEAR-X75-001",
+      "description": "Heavy-duty industrial bearing for Tata automation systems",
+      "specifications": {
+        "type": "Deep Groove Ball Bearing",
+        "innerDiameter": "75mm",
+        "outerDiameter": "130mm",
+        "width": "25mm",
+        "loadRating": "45.5 kN",
+        "speedRating": "8000 rpm",
+        "material": "Chrome Steel",
+        "sealType": "Double Shielded"
+      },
+      "applications": [
+        "Tata Motors assembly line",
+        "Tata Steel rolling mills",
+        "Tata Power turbine systems",
+        "Tata Chemicals processing equipment"
+      ],
+      "inventory": {
+        "quantity": 45,
+        "location": "Tata Pune Plant",
+        "warehouse": "Warehouse A-12",
+        "shelf": "Shelf 3-B",
+        "bin": "Bin 15"
+      },
+      "pricing": {
+        "unitPrice": 1250.00,
+        "currency": "INR",
+        "bulkDiscount": "10% for 10+ units"
+      },
+      "supplier": {
+        "name": "Tata Bearings Ltd",
+        "contact": "+91-20-1234-5678",
+        "email": "bearings@tata.com"
+      },
+      "warranty": {
+        "period": "24 months",
+        "terms": "Manufacturing defects only"
+      },
+      "criticality": "High",
+      "leadTime": "2-3 days"
+    },
+    {
+      "id": "MOTOR-V200-002",
+      "name": "Motor Drive V200",
+      "category": "motors",
+      "partNumber": "TATA-MOTOR-V200-002",
+      "description": "Variable frequency drive motor for Tata industrial automation",
+      "specifications": {
+        "type": "AC Servo Motor with VFD",
+        "power": "200 kW",
+        "voltage": "415V AC",
+        "frequency": "50/60 Hz",
+        "speed": "0-3000 rpm",
+        "torque": "637 Nm",
+        "efficiency": "95%",
+        "protection": "IP65"
+      },
+      "applications": [
+        "Tata Steel blast furnace drives",
+        "Tata Motors paint shop conveyors",
+        "Tata Power generator systems",
+        "Tata Chemicals mixing equipment"
+      ],
+      "inventory": {
+        "quantity": 12,
+        "location": "Tata Jamshedpur Plant",
+        "warehouse": "Warehouse B-8",
+        "shelf": "Shelf 1-A",
+        "bin": "Bin 22"
+      },
+      "pricing": {
+        "unitPrice": 45000.00,
+        "currency": "INR",
+        "bulkDiscount": "15% for 5+ units"
+      },
+      "supplier": {
+        "name": "Tata Motors Powertrain",
+        "contact": "+91-657-2345-6789",
+        "email": "motors@tatamotors.com"
+      },
+      "warranty": {
+        "period": "36 months",
+        "terms": "Full warranty including labor"
+      },
+      "criticality": "Critical",
+      "leadTime": "5-7 days"
+    },
+    {
+      "id": "SENSOR-P450-003",
+      "name": "Proximity Sensor P450",
+      "category": "sensors",
+      "partNumber": "TATA-SENSOR-P450-003",
+      "description": "Inductive proximity sensor for Tata automation quality control",
+      "specifications": {
+        "type": "Inductive Proximity Sensor",
+        "detectionRange": "15mm",
+        "output": "PNP NO/NC",
+        "voltage": "12-24V DC",
+        "current": "200mA",
+        "frequency": "1 kHz",
+        "material": "Stainless Steel",
+        "protection": "IP67"
+      },
+      "applications": [
+        "Tata Motors quality control stations",
+        "Tata Steel position detection",
+        "Tata Power safety systems",
+        "Tata Chemicals level monitoring"
+      ],
+      "inventory": {
+        "quantity": 78,
+        "location": "Tata Mumbai Plant",
+        "warehouse": "Warehouse C-15",
+        "shelf": "Shelf 2-C",
+        "bin": "Bin 8"
+      },
+      "pricing": {
+        "unitPrice": 850.00,
+        "currency": "INR",
+        "bulkDiscount": "8% for 20+ units"
+      },
+      "supplier": {
+        "name": "Tata Electronics",
+        "contact": "+91-22-3456-7890",
+        "email": "sensors@tataelectronics.com"
+      },
+      "warranty": {
+        "period": "18 months",
+        "terms": "Manufacturing defects only"
+      },
+      "criticality": "Medium",
+      "leadTime": "1-2 days"
+    },
+    {
+      "id": "HYDRO-ACT-004",
+      "name": "Hydraulic Actuator H500",
+      "category": "hydraulics",
+      "partNumber": "TATA-HYDRO-H500-004",
+      "description": "Heavy-duty hydraulic actuator for Tata steel processing",
+      "specifications": {
+        "type": "Double Acting Hydraulic Cylinder",
+        "bore": "100mm",
+        "stroke": "500mm",
+        "pressure": "210 bar",
+        "force": "16.5 kN",
+        "speed": "0.5 m/s",
+        "material": "Carbon Steel",
+        "sealType": "NBR"
+      },
+      "applications": [
+        "Tata Steel rolling mill operations",
+        "Tata Motors press systems",
+        "Tata Power valve control",
+        "Tata Chemicals mixing systems"
+      ],
+      "inventory": {
+        "quantity": 23,
+        "location": "Tata Steel Plant",
+        "warehouse": "Warehouse D-3",
+        "shelf": "Shelf 4-A",
+        "bin": "Bin 12"
+      },
+      "pricing": {
+        "unitPrice": 18500.00,
+        "currency": "INR",
+        "bulkDiscount": "12% for 3+ units"
+      },
+      "supplier": {
+        "name": "Tata Hydraulics",
+        "contact": "+91-657-3456-7890",
+        "email": "hydraulics@tatasteel.com"
+      },
+      "warranty": {
+        "period": "24 months",
+        "terms": "Full warranty including seals"
+      },
+      "criticality": "High",
+      "leadTime": "3-5 days"
+    },
+    {
+      "id": "PNEU-VALV-005",
+      "name": "Pneumatic Valve PV300",
+      "category": "pneumatics",
+      "partNumber": "TATA-PNEU-PV300-005",
+      "description": "High-flow pneumatic control valve for Tata automation",
+      "specifications": {
+        "type": "5/2 Way Pneumatic Valve",
+        "portSize": "1/2 inch",
+        "pressure": "0.2-8 bar",
+        "flow": "1200 Nl/min",
+        "voltage": "24V DC",
+        "responseTime": "50ms",
+        "material": "Aluminum",
+        "protection": "IP65"
+      },
+      "applications": [
+        "Tata Motors assembly line control",
+        "Tata Steel pneumatic systems",
+        "Tata Power air control",
+        "Tata Chemicals process control"
+      ],
+      "inventory": {
+        "quantity": 156,
+        "location": "Tata Pune Plant",
+        "warehouse": "Warehouse A-8",
+        "shelf": "Shelf 1-B",
+        "bin": "Bin 25"
+      },
+      "pricing": {
+        "unitPrice": 3200.00,
+        "currency": "INR",
+        "bulkDiscount": "10% for 15+ units"
+      },
+      "supplier": {
+        "name": "Tata Pneumatics",
+        "contact": "+91-20-4567-8901",
+        "email": "pneumatics@tata.com"
+      },
+      "warranty": {
+        "period": "18 months",
+        "terms": "Manufacturing defects only"
+      },
+      "criticality": "Medium",
+      "leadTime": "2-3 days"
+    },
+    {
+      "id": "ELEC-SW-006",
+      "name": "Electrical Switch ES100",
+      "category": "electrical",
+      "partNumber": "TATA-ELEC-ES100-006",
+      "description": "Industrial electrical switch for Tata control panels",
+      "specifications": {
+        "type": "Emergency Stop Switch",
+        "contacts": "2NO + 2NC",
+        "voltage": "24V DC",
+        "current": "10A",
+        "protection": "IP67",
+        "material": "Polycarbonate",
+        "color": "Red",
+        "mounting": "Panel Mount"
+      },
+      "applications": [
+        "Tata Motors safety systems",
+        "Tata Steel emergency stops",
+        "Tata Power control panels",
+        "Tata Chemicals safety circuits"
+      ],
+      "inventory": {
+        "quantity": 89,
+        "location": "Tata Mumbai Plant",
+        "warehouse": "Warehouse C-12",
+        "shelf": "Shelf 3-A",
+        "bin": "Bin 18"
+      },
+      "pricing": {
+        "unitPrice": 450.00,
+        "currency": "INR",
+        "bulkDiscount": "5% for 50+ units"
+      },
+      "supplier": {
+        "name": "Tata Electricals",
+        "contact": "+91-22-5678-9012",
+        "email": "electricals@tata.com"
+      },
+      "warranty": {
+        "period": "12 months",
+        "terms": "Manufacturing defects only"
+      },
+      "criticality": "Critical",
+      "leadTime": "1-2 days"
+    },
+    {
+      "id": "CONV-BELT-007",
+      "name": "Conveyor Belt CB800",
+      "category": "conveyors",
+      "partNumber": "TATA-CONV-CB800-007",
+      "description": "Heavy-duty conveyor belt for Tata material handling",
+      "specifications": {
+        "type": "Steel Cord Conveyor Belt",
+        "width": "800mm",
+        "length": "50m",
+        "thickness": "12mm",
+        "tensileStrength": "2000 N/mm",
+        "material": "Rubber + Steel Cord",
+        "temperature": "-20°C to +80°C",
+        "protection": "Fire Resistant"
+      },
+      "applications": [
+        "Tata Steel material transport",
+        "Tata Motors assembly lines",
+        "Tata Power coal handling",
+        "Tata Chemicals bulk transport"
+      ],
+      "inventory": {
+        "quantity": 8,
+        "location": "Tata Steel Plant",
+        "warehouse": "Warehouse D-15",
+        "shelf": "Shelf 5-C",
+        "bin": "Bin 3"
+      },
+      "pricing": {
+        "unitPrice": 125000.00,
+        "currency": "INR",
+        "bulkDiscount": "20% for 2+ units"
+      },
+      "supplier": {
+        "name": "Tata Conveyors",
+        "contact": "+91-657-6789-0123",
+        "email": "conveyors@tatasteel.com"
+      },
+      "warranty": {
+        "period": "60 months",
+        "terms": "Full warranty including installation"
+      },
+      "criticality": "High",
+      "leadTime": "7-10 days"
+    },
+    {
+      "id": "ROBOT-ARM-008",
+      "name": "Robotic Arm RA600",
+      "category": "robotics",
+      "partNumber": "TATA-ROBOT-RA600-008",
+      "description": "Industrial robotic arm for Tata automation systems",
+      "specifications": {
+        "type": "6-Axis Articulated Robot",
+        "payload": "25 kg",
+        "reach": "600mm",
+        "repeatability": "±0.05mm",
+        "speed": "2.5 m/s",
+        "power": "3.5 kW",
+        "protection": "IP54",
+        "controller": "Tata Robot Controller"
+      },
+      "applications": [
+        "Tata Motors welding operations",
+        "Tata Steel material handling",
+        "Tata Power maintenance tasks",
+        "Tata Chemicals precision operations"
+      ],
+      "inventory": {
+        "quantity": 5,
+        "location": "Tata Pune Plant",
+        "warehouse": "Warehouse A-20",
+        "shelf": "Shelf 6-A",
+        "bin": "Bin 1"
+      },
+      "pricing": {
+        "unitPrice": 850000.00,
+        "currency": "INR",
+        "bulkDiscount": "25% for 2+ units"
+      },
+      "supplier": {
+        "name": "Tata Robotics",
+        "contact": "+91-20-7890-1234",
+        "email": "robotics@tata.com"
+      },
+      "warranty": {
+        "period": "60 months",
+        "terms": "Full warranty including training"
+      },
+      "criticality": "Critical",
+      "leadTime": "15-20 days"
+    },
+    {
+      "id": "BEAR-X100-009",
+      "name": "Bearing X-100",
+      "category": "bearings",
+      "partNumber": "TATA-BEAR-X100-009",
+      "description": "Ultra-heavy-duty bearing for Tata steel mill applications",
+      "specifications": {
+        "type": "Tapered Roller Bearing",
+        "innerDiameter": "100mm",
+        "outerDiameter": "180mm",
+        "width": "40mm",
+        "loadRating": "85.2 kN",
+        "speedRating": "6000 rpm",
+        "material": "Chrome Steel",
+        "sealType": "Contact Seal"
+      },
+      "applications": [
+        "Tata Steel rolling mill stands",
+        "Tata Motors heavy-duty applications",
+        "Tata Power turbine bearings",
+        "Tata Chemicals high-load systems"
+      ],
+      "inventory": {
+        "quantity": 28,
+        "location": "Tata Steel Plant",
+        "warehouse": "Warehouse D-8",
+        "shelf": "Shelf 2-A",
+        "bin": "Bin 20"
+      },
+      "pricing": {
+        "unitPrice": 2850.00,
+        "currency": "INR",
+        "bulkDiscount": "12% for 8+ units"
+      },
+      "supplier": {
+        "name": "Tata Bearings Ltd",
+        "contact": "+91-20-1234-5678",
+        "email": "bearings@tata.com"
+      },
+      "warranty": {
+        "period": "36 months",
+        "terms": "Full warranty including installation"
+      },
+      "criticality": "Critical",
+      "leadTime": "3-5 days"
+    },
+    {
+      "id": "MOTOR-V300-010",
+      "name": "Motor Drive V300",
+      "category": "motors",
+      "partNumber": "TATA-MOTOR-V300-010",
+      "description": "High-power variable frequency drive for Tata heavy industry",
+      "specifications": {
+        "type": "AC Servo Motor with VFD",
+        "power": "300 kW",
+        "voltage": "415V AC",
+        "frequency": "50/60 Hz",
+        "speed": "0-4000 rpm",
+        "torque": "955 Nm",
+        "efficiency": "96%",
+        "protection": "IP66"
+      },
+      "applications": [
+        "Tata Steel blast furnace drives",
+        "Tata Motors heavy assembly lines",
+        "Tata Power generator systems",
+        "Tata Chemicals high-power mixing"
+      ],
+      "inventory": {
+        "quantity": 7,
+        "location": "Tata Jamshedpur Plant",
+        "warehouse": "Warehouse B-12",
+        "shelf": "Shelf 1-C",
+        "bin": "Bin 5"
+      },
+      "pricing": {
+        "unitPrice": 75000.00,
+        "currency": "INR",
+        "bulkDiscount": "20% for 3+ units"
+      },
+      "supplier": {
+        "name": "Tata Motors Powertrain",
+        "contact": "+91-657-2345-6789",
+        "email": "motors@tatamotors.com"
+      },
+      "warranty": {
+        "period": "48 months",
+        "terms": "Full warranty including maintenance"
+      },
+      "criticality": "Critical",
+      "leadTime": "7-10 days"
+    }
+  ],
+  "projects": [
+    {
+      "id": "PROJECT-X75",
+      "name": "Project X-75",
+      "description": "Tata Industries automation upgrade project",
+      "parts": ["BEAR-X75-001", "MOTOR-V200-002", "SENSOR-P450-003"],
+      "status": "Active",
+      "budget": "25,00,000 INR",
+      "timeline": "6 months"
+    },
+    {
+      "id": "PROJECT-V200",
+      "name": "Motor Drive V200 Upgrade",
+      "description": "Tata Motors powertrain modernization",
+      "parts": ["MOTOR-V200-002", "ELEC-SW-006", "ROBOT-ARM-008"],
+      "status": "Planning",
+      "budget": "50,00,000 INR",
+      "timeline": "12 months"
+    },
+    {
+      "id": "PROJECT-P450",
+      "name": "Proximity Sensor P450 Implementation",
+      "description": "Tata Steel quality control automation",
+      "parts": ["SENSOR-P450-003", "HYDRO-ACT-004", "PNEU-VALV-005"],
+      "status": "Active",
+      "budget": "15,00,000 INR",
+      "timeline": "4 months"
+    }
+  ],
+  "locations": [
+    {
+      "id": "TATA-PUNE",
+      "name": "Tata Pune Plant",
+      "address": "Pune, Maharashtra, India",
+      "type": "Manufacturing",
+      "capacity": "High"
+    },
+    {
+      "id": "TATA-JAMSHEDPUR",
+      "name": "Tata Jamshedpur Plant",
+      "address": "Jamshedpur, Jharkhand, India",
+      "type": "Steel Production",
+      "capacity": "Very High"
+    },
+    {
+      "id": "TATA-MUMBAI",
+      "name": "Tata Mumbai Plant",
+      "address": "Mumbai, Maharashtra, India",
+      "type": "Corporate & R&D",
+      "capacity": "Medium"
+    },
+    {
+      "id": "TATA-STEEL",
+      "name": "Tata Steel Plant",
+      "address": "Jamshedpur, Jharkhand, India",
+      "type": "Steel Manufacturing",
+      "capacity": "Very High"
+    }
+  ],
+  "suppliers": [
+    {
+      "id": "TATA-BEARINGS",
+      "name": "Tata Bearings Ltd",
+      "specialization": "Industrial Bearings",
+      "rating": "5.0",
+      "deliveryTime": "2-3 days"
+    },
+    {
+      "id": "TATA-MOTORS-PT",
+      "name": "Tata Motors Powertrain",
+      "specialization": "Motors & Drives",
+      "rating": "4.8",
+      "deliveryTime": "5-7 days"
+    },
+    {
+      "id": "TATA-ELECTRONICS",
+      "name": "Tata Electronics",
+      "specialization": "Sensors & Electronics",
+      "rating": "4.9",
+      "deliveryTime": "1-2 days"
+    },
+    {
+      "id": "TATA-HYDRAULICS",
+      "name": "Tata Hydraulics",
+      "specialization": "Hydraulic Systems",
+      "rating": "4.7",
+      "deliveryTime": "3-5 days"
+    },
+    {
+      "id": "TATA-PNEUMATICS",
+      "name": "Tata Pneumatics",
+      "specialization": "Pneumatic Systems",
+      "rating": "4.6",
+      "deliveryTime": "2-3 days"
+    },
+    {
+      "id": "TATA-ELECTRICALS",
+      "name": "Tata Electricals",
+      "specialization": "Electrical Components",
+      "rating": "4.8",
+      "deliveryTime": "1-2 days"
+    },
+    {
+      "id": "TATA-CONVEYORS",
+      "name": "Tata Conveyors",
+      "specialization": "Conveyor Systems",
+      "rating": "4.5",
+      "deliveryTime": "7-10 days"
+    },
+    {
+      "id": "TATA-ROBOTICS",
+      "name": "Tata Robotics",
+      "specialization": "Robotics & Automation",
+      "rating": "4.9",
+      "deliveryTime": "15-20 days"
+    }
+  ]
+}

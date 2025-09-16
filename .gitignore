@@ -1,0 +1,29 @@
+# Node
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Builds
+/dist/
+/.vite/
+.vite/
+.vscode/
+.DS_Store
+
+# Env
+.env
+.env.*
+
+# Locks (optional)
+# bun.lockb
+# pnpm-lock.yaml
+
+# Coverage
+coverage/
+
+# Misc
+*.local

@@ -1,0 +1,34 @@
+# Development files
+node_modules
+.env.local
+.env.development
+.env.test
+
+# Build artifacts
+*.log
+*.tsbuildinfo
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Documentation (not needed in production)
+docs/
+README.md
+
+# Testing files
+__tests__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+
+# Development configuration
+.eslintrc.*
+.prettierrc
+.prettierignore
+
+# Source maps (optional, remove if you want them in production)
+*.map

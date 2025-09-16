@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synapse Configuration</title>
+    <script src="https://res.cdn.office.net/teams-js/2.0.0/js/MicrosoftTeams.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f3f2f1;
+            padding: 20px;
+            margin: 0;
+        }
+        .container {
+            max-width: 600px;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .icon {
+            width: 48px;
+            height: 48px;
+            background: #06B6D4;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+            margin-right: 15px;
+        }
+        h1 {
+            margin: 0;
+            color: #323130;
+            font-size: 24px;
+        }
+        p {
+            color: #605e5c;
+            line-height: 1.5;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            color: #323130;
+        }
+        .feature-list li:before {
+            content: "✓";
+            color: #06B6D4;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .save-btn {
+            background: #06B6D4;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .save-btn:hover {
+            background: #0891b2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="icon">S</div>
+            <h1>Synapse - AI Spare Parts Intelligence</h1>
+        </div>
+        
+        <p>Configure Synapse for your team to enable instant spare parts identification and inventory management.</p>
+        
+        <ul class="feature-list">
+            <li>Visual part recognition with camera or photo upload</li>
+            <li>Real-time inventory status and availability</li>
+            <li>Warranty information and part specifications</li>
+            <li>Direct integration with your existing workflow</li>
+        </ul>
+        
+        <button class="save-btn" onclick="saveConfiguration()">Add Synapse to Team</button>
+    </div>
+
+    <script>
+        microsoftTeams.app.initialize().then(() => {
+            console.log("Teams context initialized");
+        });
+
+        function saveConfiguration() {
+            const config = {
+                entityId: "synapse-tab",
+                contentUrl: "https://your-app-domain.vercel.app/",
+                suggestedDisplayName: "Synapse AI"
+            };
+            
+            microsoftTeams.pages.config.setConfig(config);
+            microsoftTeams.pages.config.setValidityState(true);
+        }
+
+        // Auto-enable save button when page loads
+        microsoftTeams.pages.config.registerOnSaveHandler((saveEvent) => {
+            const config = {
+                entityId: "synapse-tab",
+                contentUrl: "https://your-app-domain.vercel.app/",
+                suggestedDisplayName: "Synapse AI"
+            };
+            
+            microsoftTeams.pages.config.setConfig(config);
+            saveEvent.notifySuccess();
+        });
+
+        microsoftTeams.pages.config.setValidityState(true);
+    </script>
+</body>
+</html>
