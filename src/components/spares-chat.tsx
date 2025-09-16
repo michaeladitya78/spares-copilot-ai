@@ -64,6 +64,7 @@ export function SparesChat() {
   const [activeTab, setActiveTab] = useState('chat');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [selectedPart, setSelectedPart] = useState<any | null>(null);
   // Component refs for DOM access
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -517,8 +518,13 @@ export function SparesChat() {
     setIsLoading(false);
   };
 
+  // When a search result is received, show a list with View Details buttons
+  const handleShowDetails = (part: any) => {
+    setSelectedPart(part);
+  };
+
   return (
-    <Card className="flex flex-col h-[700px] bg-card shadow-elegant border border-border/50">
+    <div className="flex flex-col h-full">
       {/* Synapse Header */}
       <SynapseHeader />
 
@@ -559,8 +565,8 @@ export function SparesChat() {
             onIdentifyByDescription={handleIdentifyByDescription}
           />
         ) : (
-          <ScrollArea ref={scrollAreaRef} className="h-full">
-            <div className="p-4 space-y-4">
+          <ScrollArea ref={scrollAreaRef} className="flex-1">
+            <div className="flex flex-col gap-2">
               {/* Inventory Status Widget */}
               <InventoryStatusWidget className="mb-4" />
               
@@ -640,6 +646,28 @@ export function SparesChat() {
               {isLoading && (
                 <SynapseLoading type={loadingType} />
               )}
+
+              {/* Show search results as a list with View Details buttons */}
+              {searchResults.length > 0 && !selectedPart && (
+                <div className="space-y-2">
+                  {searchResults.map((part) => (
+                    <Card key={part.partNumber} className="flex items-center justify-between p-3">
+                      <div>
+                        <div className="font-semibold">{part.name}</div>
+                        <div className="text-xs text-muted-foreground">Part #: {part.partNumber}</div>
+                      </div>
+                      <Button size="sm" onClick={() => handleShowDetails(part)}>
+                        View Details
+                      </Button>
+                    </Card>
+                  ))}
+                </div>
+              )}
+
+              {/* Show selected part details if chosen */}
+              {selectedPart && (
+                <SynapseResultCard partData={selectedPart} />
+              )}
             </div>
           </ScrollArea>
         )}
@@ -710,6 +738,6 @@ export function SparesChat() {
           </div>
         </div>
       )}
-    </Card>
+    </div>
   );
 }
