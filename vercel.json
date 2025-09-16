@@ -20,7 +20,6 @@
     { "source": "/bot", "destination": "/dist/index.html" },
     { "source": "/teams-config", "destination": "/dist/index.html" },
     { "source": "/", "destination": "/dist/index.html" },
-    { "source": "/:file", "has": [{"type": "file"}], "destination": "/dist/:file" },
     { "source": "/(.*)", "destination": "/dist/index.html" }
   ]
 }
