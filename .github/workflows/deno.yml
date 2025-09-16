@@ -20,6 +20,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
+    if: false  # disabled (no deno project)
 
     steps:
       - name: Setup repo
@@ -35,8 +36,5 @@ jobs:
       # - name: Verify formatting
       #   run: deno fmt --check
 
-      - name: Run linter
-        run: deno lint
-
-      - name: Run tests
-        run: deno test -A
+      - name: Skip (no deno)
+        run: echo "Skipping deno lint/test"
