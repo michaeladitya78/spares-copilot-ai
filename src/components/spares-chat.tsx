@@ -518,10 +518,11 @@ export function SparesChat() {
     setIsLoading(false);
   };
 
-  // When a search result is received, show a list with View Details buttons
+  // When a search result is received, show a card for each part with View Details inside the card
   const handleShowDetails = (part: any) => {
     setSelectedPart(part);
   };
+  const handleCloseDetails = () => setSelectedPart(null);
 
   return (
     <div className="flex flex-col h-full">
@@ -566,7 +567,7 @@ export function SparesChat() {
           />
         ) : (
           <ScrollArea ref={scrollAreaRef} className="flex-1">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-4">
               {/* Inventory Status Widget */}
               <InventoryStatusWidget className="mb-4" />
               
@@ -647,16 +648,31 @@ export function SparesChat() {
                 <SynapseLoading type={loadingType} />
               )}
 
-              {/* Show search results as a list with View Details buttons */}
+              {/* Show search results as cards with View Details button inside */}
               {searchResults.length > 0 && !selectedPart && (
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {searchResults.map((part) => (
-                    <Card key={part.partNumber} className="flex items-center justify-between p-3">
-                      <div>
-                        <div className="font-semibold">{part.name}</div>
-                        <div className="text-xs text-muted-foreground">Part #: {part.partNumber}</div>
+                    <Card key={part.partNumber} className="p-4 flex flex-col gap-2 bg-card shadow-md border-primary/10">
+                      <div className="flex items-center gap-3">
+                        {part.imageUrl && (
+                          <img src={part.imageUrl} alt={part.name} className="w-16 h-16 object-cover rounded-md border" />
+                        )}
+                        <div className="flex-1">
+                          <div className="font-semibold text-lg text-primary">{part.name}</div>
+                          <div className="text-xs text-muted-foreground">Part #: {part.partNumber}</div>
+                          {part.price && (
+                            <div className="text-sm text-success font-medium">₹{part.price}</div>
+                          )}
+                          <div className="text-xs mt-1">
+                            {part.inStock ? (
+                              <Badge variant="secondary" className="text-success">In Stock</Badge>
+                            ) : (
+                              <Badge variant="secondary" className="text-destructive">Out of Stock</Badge>
+                            )}
+                          </div>
+                        </div>
                       </div>
-                      <Button size="sm" onClick={() => handleShowDetails(part)}>
+                      <Button size="sm" className="mt-4 w-full" onClick={() => handleShowDetails(part)}>
                         View Details
                       </Button>
                     </Card>
@@ -664,9 +680,16 @@ export function SparesChat() {
                 </div>
               )}
 
-              {/* Show selected part details if chosen */}
+              {/* Show selected part details in a modal-style card */}
               {selectedPart && (
-                <SynapseResultCard partData={selectedPart} />
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+                  <Card className="max-w-lg w-full p-6 relative animate-in fade-in-0 zoom-in-95">
+                    <Button size="icon" variant="ghost" className="absolute top-2 right-2" onClick={handleCloseDetails}>
+                      ×
+                    </Button>
+                    <SynapseResultCard partData={selectedPart} />
+                  </Card>
+                </div>
               )}
             </div>
           </ScrollArea>
