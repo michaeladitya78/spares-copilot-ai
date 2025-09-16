@@ -43,16 +43,31 @@ const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 1000 // limit each IP to 1000 requests per windowMs
 });
+app.use(helmet());
+app.use(cors());
+app.use(compression());
+app.use(morgan('combined'));
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
+
+// Rate limiting
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 });
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 app.use(limiter);
 
 const PORT = process.env.PORT || 8788;
 
+<<<<<<< HEAD
 // Add API version header to all responses
+=======
+// API versioning
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 app.use((req, res, next) => {
   res.setHeader('X-API-Version', 'v1');
   next();
 });
 
+<<<<<<< HEAD
 // --------------------
 // Query understanding helpers
 // --------------------
@@ -169,6 +184,12 @@ async function translateToEnglishWithGemini(text) {
 class SimpleWebSocketService {
   constructor() {
     this.clients = new Map(); // Store all connected clients
+=======
+// Simple WebSocket service
+class SimpleWebSocketService {
+  constructor() {
+    this.clients = new Map();
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
   }
 
   initialize(server) {
@@ -284,6 +305,7 @@ class SimpleWebSocketService {
     const contentLower = content.toLowerCase();
     let response = "";
 
+<<<<<<< HEAD
     // If it's a non-domain query or greeting, respond with scope message
     if (!isSparePartsQuery(content)) {
       this.sendToClient(clientId, {
@@ -296,6 +318,9 @@ class SimpleWebSocketService {
     }
 
     // Smart response system - matches user queries to our parts database
+=======
+    // Intelligent responses based on Tata Industries data
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
     if (contentLower.includes('bearing') || contentLower.includes('x-75')) {
       const bearing = tataPartsData.parts.find(p => p.id === 'BEAR-X75-001');
       response = `Found Bearing X-75! Part Number: ${bearing.partNumber}, Quantity: ${bearing.inventory.quantity} units at ${bearing.inventory.location}. Price: ₹${bearing.pricing.unitPrice}. This is a heavy-duty industrial bearing for Tata automation systems.`;
@@ -312,14 +337,26 @@ class SimpleWebSocketService {
     } else if (contentLower.includes('help') || contentLower.includes('what can you do')) {
       response = `I can help you with: 1) Finding spare parts (try "Bearing X-75", "Motor V200", "Sensor P450"), 2) Checking inventory status, 3) Project information, 4) Technical specifications, 5) Pricing and availability. What would you like to know?`;
     } else {
+<<<<<<< HEAD
       // Token-based search to avoid tiny token matches
       const matchingParts = findMatchingPartsByTokens(contentLower);
+=======
+      // Search through parts for any matches
+      const matchingParts = tataPartsData.parts.filter(part => 
+        part.name.toLowerCase().includes(contentLower) ||
+        part.partNumber.toLowerCase().includes(contentLower) ||
+        part.description.toLowerCase().includes(contentLower)
+      );
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
       
       if (matchingParts.length > 0) {
         const part = matchingParts[0];
         response = `Found ${part.name}! Part Number: ${part.partNumber}, Quantity: ${part.inventory.quantity} units at ${part.inventory.location}. Price: ₹${part.pricing.unitPrice}. ${part.description}`;
       } else {
+<<<<<<< HEAD
         // Help the user with suggestions when we can't find what they're looking for
+=======
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
         response = `I couldn't find specific information about "${content}". Try asking about: Bearing X-75, Motor Drive V200, Proximity Sensor P450, inventory status, or Tata Industries projects. I'm here to help with spare parts and technical information!`;
       }
     }
@@ -371,7 +408,11 @@ class SimpleWebSocketService {
 // Initialize WebSocket service
 const wsService = new SimpleWebSocketService();
 
+<<<<<<< HEAD
 // Basic health check endpoint
+=======
+// Health check
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 app.get("/api/health", (_req, res) => {
   res.json({ 
     status: "ok", 
@@ -382,10 +423,16 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+<<<<<<< HEAD
 // Enhanced chat endpoint with Gemini AI integration
 app.post("/api/chat", async (req, res) => {
   const { message } = req.body;
   const acceptLang = (req.headers['accept-language'] || '').split(',')[0] || 'en';
+=======
+// Chat endpoint with Tata Industries intelligence
+app.post("/api/chat", (req, res) => {
+  const { message } = req.body;
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
   
   if (!message) {
     return res.json({
@@ -395,6 +442,7 @@ app.post("/api/chat", async (req, res) => {
     });
   }
 
+<<<<<<< HEAD
   try {
     // Normalize multilingual queries: detect & translate to English for matching context
     const detectedLang = detectLanguageFromText(message);
@@ -430,6 +478,12 @@ app.post("/api/chat", async (req, res) => {
   }
 
   // Smart response system - matches user queries to our parts database
+=======
+  const messageLower = message.toLowerCase();
+  let response = "";
+
+  // Intelligent responses based on Tata Industries data
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
   if (messageLower.includes('bearing') || messageLower.includes('x-75')) {
     const bearing = tataPartsData.parts.find(p => p.id === 'BEAR-X75-001');
     response = `Found Bearing X-75! Part Number: ${bearing.partNumber}, Quantity: ${bearing.inventory.quantity} units at ${bearing.inventory.location}. Price: ₹${bearing.pricing.unitPrice}. This is a heavy-duty industrial bearing for Tata automation systems.`;
@@ -451,8 +505,17 @@ app.post("/api/chat", async (req, res) => {
   } else if (messageLower.includes('help') || messageLower.includes('what can you do')) {
     response = `I can help you with: 1) Finding spare parts (try "Bearing X-75", "Motor V200", "Sensor P450"), 2) Checking inventory status, 3) Project information, 4) Technical specifications, 5) Pricing and availability. What would you like to know?`;
   } else {
+<<<<<<< HEAD
     // Tokenized search through parts to avoid matching tiny words like 'hi'
     const matchingParts = findMatchingPartsByTokens(messageLower);
+=======
+    // Search through parts for any matches
+    const matchingParts = tataPartsData.parts.filter(part => 
+      part.name.toLowerCase().includes(messageLower) ||
+      part.partNumber.toLowerCase().includes(messageLower) ||
+      part.description.toLowerCase().includes(messageLower)
+    );
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
     
     if (matchingParts.length > 0) {
       const part = matchingParts[0];
@@ -465,8 +528,12 @@ app.post("/api/chat", async (req, res) => {
   res.json({
     response,
     sessionId: 'simple_session',
+<<<<<<< HEAD
     timestamp: new Date().toISOString(),
     source: 'local'
+=======
+    timestamp: new Date().toISOString()
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
   });
 });
 
@@ -495,8 +562,13 @@ app.get("/api/inventory/status", (_req, res) => {
     inStock,
     outOfStock,
     lowStock,
+<<<<<<< HEAD
     featured: featuredParts,
     lastUpdated: new Date().toISOString(),
+=======
+    featuredParts,
+    lastUpdate: new Date().toISOString(),
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
     company: "Tata Industries",
     categories: tataPartsData.categories.length
   });
@@ -546,6 +618,7 @@ app.get("/api/parts", (req, res) => {
   });
 });
 
+<<<<<<< HEAD
 // Part request endpoint with inventory decrement
 app.post("/api/parts/:id/request", (req, res) => {
   const { id } = req.params;
@@ -591,6 +664,8 @@ app.post("/api/parts/:id/request", (req, res) => {
   });
 });
 
+=======
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 // User search
 app.get("/api/users/search", (req, res) => {
   const { q } = req.query;
@@ -629,10 +704,16 @@ app.post("/api/images/upload", (req, res) => {
       size: 1024000,
       mimetype: "image/jpeg",
       uploadedAt: new Date().toISOString(),
+<<<<<<< HEAD
       ocrText: "",
       hints: { sizeBytes: 1024000, available: true }
     },
     note: "⚠️ Image recognition is not trained for this image. Sorry, I cannot recognize this part with the current data. Please try describing the part or provide a part number."
+=======
+      ocrText: "Sample OCR text from uploaded image",
+      hints: { sizeBytes: 1024000, available: true }
+    }
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
   });
 });
 

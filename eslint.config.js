@@ -9,9 +9,7 @@ export default tseslint.config(
     ignores: [
       "dist",
       "node_modules",
-      // UI lib components are third‑party style; exclude from strict lint to keep builds green
       "src/components/ui/**",
-      // Tooling configs
       "tailwind.config.ts",
     ],
   },
@@ -29,7 +27,6 @@ export default tseslint.config(
     rules: {
       ...reactHooks.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
-      // Keep CI green and avoid noisy rules for this project setup
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-empty-object-type": "off",

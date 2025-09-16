@@ -17,9 +17,12 @@ import {
 import { cn } from "@/lib/utils";
 import { PartFeatureMarker } from "@/components/part-feature-marker";
 
+<<<<<<< HEAD
 // Component to display detailed information about a spare part
 // Shows inventory status, warranty info, and allows part requests
 
+=======
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 interface PartData {
   id?: string;
   partNumber: string;
@@ -33,10 +36,13 @@ interface PartData {
   isFeatured?: boolean;
   location?: string;
   features?: string[];
+<<<<<<< HEAD
   price?: number;
   currency?: string;
   category?: string;
   description?: string;
+=======
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 }
 
 interface SynapseResultCardProps {
@@ -51,7 +57,10 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
     const [copied, setCopied] = React.useState(false);
     const [isRequesting, setIsRequesting] = React.useState(false);
     const [requestSuccess, setRequestSuccess] = React.useState(false);
+<<<<<<< HEAD
     const [currentQuantity, setCurrentQuantity] = React.useState(partData.quantity);
+=======
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 
     React.useEffect(() => {
       const timer = setTimeout(() => {
@@ -62,7 +71,11 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
     }, [animationDelay]);
 
     const handleRequestPart = async () => {
+<<<<<<< HEAD
       if (!partData.id || currentQuantity <= 0) return;
+=======
+      if (!partData.id) return;
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
       
       setIsRequesting(true);
       try {
@@ -73,12 +86,17 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
         
         if (response.ok) {
           const data = await response.json();
+<<<<<<< HEAD
           setCurrentQuantity(data.newQuantity);
           setRequestSuccess(true);
           setTimeout(() => setRequestSuccess(false), 3000);
         } else {
           const errorData = await response.json();
           console.error('Request failed:', errorData.error);
+=======
+          setRequestSuccess(true);
+          setTimeout(() => setRequestSuccess(false), 3000);
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
         }
       } catch (error) {
         console.error('Request part error:', error);
@@ -199,10 +217,14 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
                         await navigator.clipboard.writeText(partData.partNumber);
                         setCopied(true);
                         setTimeout(() => setCopied(false), 1500);
+<<<<<<< HEAD
                       } catch (err) {
                         // Best-effort clipboard copy; ignore if blocked
                         console.warn('Copy failed', err);
                       }
+=======
+                      } catch {}
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
                     }}
                     aria-label="Copy part number"
                   >
@@ -228,11 +250,19 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
           <div className="flex items-center gap-4">
             <div className={cn(
               "w-12 h-12 rounded-xl flex items-center justify-center shadow-sm",
+<<<<<<< HEAD
               currentQuantity > 0 
                 ? "bg-gradient-to-br from-success/10 to-success/5" 
                 : "bg-gradient-to-br from-destructive/10 to-destructive/5"
             )}>
               {currentQuantity > 0 ? (
+=======
+              partData.inStock 
+                ? "bg-gradient-to-br from-success/10 to-success/5" 
+                : "bg-gradient-to-br from-destructive/10 to-destructive/5"
+            )}>
+              {partData.inStock ? (
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
                 <CheckCircle className="h-6 w-6 text-success" />
               ) : (
                 <XCircle className="h-6 w-6 text-destructive" />
@@ -243,15 +273,26 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
               <div className="flex items-center gap-2">
                 <h4 className="font-semibold text-foreground">Inventory Status</h4>
                 <Badge 
+<<<<<<< HEAD
                   variant={currentQuantity > 0 ? "default" : "destructive"}
                   className={cn(
                     "text-xs",
                     currentQuantity > 0 && (currentQuantity < 5
+=======
+                  variant={partData.inStock ? "default" : "destructive"}
+                  className={cn(
+                    "text-xs",
+                    partData.inStock && (partData.quantity < 5
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
                       ? "bg-warning/20 text-warning"
                       : "bg-gradient-success text-success-foreground animate-glow")
                   )}
                 >
+<<<<<<< HEAD
                   {currentQuantity > 0 ? (currentQuantity < 5 ? "LOW STOCK" : "IN STOCK") : "OUT OF STOCK"}
+=======
+                  {partData.inStock ? (partData.quantity < 5 ? "LOW STOCK" : "IN STOCK") : "OUT OF STOCK"}
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
                 </Badge>
               </div>
               
@@ -259,7 +300,11 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
                 <div className="flex items-center gap-1">
                   <Package className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">
+<<<<<<< HEAD
                     {currentQuantity} units available
+=======
+                    {partData.quantity} units available
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
                   </span>
                 </div>
                 
@@ -330,14 +375,21 @@ export const SynapseResultCard = React.forwardRef<HTMLDivElement, SynapseResultC
             variant="default" 
             className="flex-1 bg-gradient-to-r from-primary to-synapse-blue-dark hover:from-synapse-blue-dark hover:to-primary"
             onClick={handleRequestPart}
+<<<<<<< HEAD
             disabled={isRequesting || currentQuantity <= 0}
+=======
+            disabled={isRequesting || !partData.inStock}
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
           >
             {isRequesting ? (
               "Requesting..."
             ) : requestSuccess ? (
               "✓ Requested"
+<<<<<<< HEAD
             ) : currentQuantity <= 0 ? (
               "Out of Stock"
+=======
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
             ) : (
               "Request Part"
             )}
