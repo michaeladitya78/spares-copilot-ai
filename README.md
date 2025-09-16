@@ -92,12 +92,49 @@ ws.onmessage = (event) => {
 ### Installation
 ```bash
 # Clone repository
+<<<<<<< HEAD
+git clone https://github.com/michaeladitya78/spares-copilot-ai.git
+=======
 git clone <repository-url>
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 cd spares-copilot-ai
 
 # Install dependencies
 npm install
 
+<<<<<<< HEAD
+# Optional: Add Gemini API key for enhanced AI responses
+echo "GEMINI_API_KEY=your_api_key_here" > .env
+
+# Start backend server (Terminal 1)
+npm run server:simple
+
+# Start frontend (Terminal 2)  
+npm run dev
+```
+
+> **Note**: For the complete setup guide including Gemini AI integration, see [SETUP_GUIDE.md](./SETUP_GUIDE.md)
+
+### Access Points
+- **Frontend**: http://localhost:5173/
+- **Backend API**: http://localhost:8788/api/health
+- **API Documentation**: http://localhost:8788/api/docs
+- **WebSocket**: ws://localhost:8788/ws
+
+## 📋 Testing Report
+
+**Status: ✅ ALL FUNCTIONAL REQUIREMENTS PASSED**
+
+For detailed testing results and architecture analysis, see [TESTING_REPORT.md](./TESTING_REPORT.md).
+
+### Major Features Tested & Working:
+- ✅ Chatbot fallback when data is missing
+- ✅ Scope limitation for non-spare-parts queries  
+- ✅ Inventory decrementing on part requests
+- ✅ Advanced search functionality
+- ✅ Camera/image input processing
+- ✅ **NEW**: Google Gemini AI integration for intelligent responses
+=======
 # Start development server
 npm run server:simple
 ```
@@ -107,6 +144,7 @@ npm run server:simple
 - **API Health**: http://localhost:8787/api/health
 - **API Documentation**: http://localhost:8787/api/docs
 - **WebSocket**: ws://localhost:8787/ws
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 
 ## 🎯 Features
 

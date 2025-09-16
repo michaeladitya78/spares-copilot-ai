@@ -42,31 +42,70 @@ interface WebSocketMessage {
 
 type ChatState = "welcome" | "chatting";
 
+<<<<<<< HEAD
+// Keep parts data in memory for faster lookups
+// TODO: Move to proper state management when we scale up
+let cachedParts: any[] = [];
+
+export function SparesChat() {
+  // Chat conversation state
+=======
 // Database-driven parts will be fetched from API
 let cachedParts: any[] = [];
 
 export function SparesChat() {
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
   const [messages, setMessages] = useState<Message[]>([]);
   const [chatState, setChatState] = useState<ChatState>("welcome");
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+<<<<<<< HEAD
+  
+  // File handling state
+=======
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
   const [showFileUpload, setShowFileUpload] = useState(false);
   const [loadingType, setLoadingType] = useState<"image" | "text">("text");
   const [uploadPreview, setUploadPreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+<<<<<<< HEAD
+  
+  // WebSocket and backend connection
+  const [wsConnected, setWsConnected] = useState(false);
+  const [botStats, setBotStats] = useState<BotStats | null>(null);
+  
+  // Search functionality
+  const [activeTab, setActiveTab] = useState('chat');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  
+  // Component refs for DOM access
+=======
   const [wsConnected, setWsConnected] = useState(false);
   const [botStats, setBotStats] = useState<BotStats | null>(null);
   const [activeTab, setActiveTab] = useState('chat');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
+<<<<<<< HEAD
+  // Set up WebSocket for real-time communication
+  // This connects us to the backend for live inventory updates
+  useEffect(() => {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = process.env.NODE_ENV === 'development' 
+      ? `${window.location.hostname}:8788` 
+      : window.location.host;
+    const wsUrl = `${protocol}//${host}/ws`;
+=======
   // Initialize WebSocket connection
   useEffect(() => {
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/ws`;
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
     
     wsRef.current = new WebSocket(wsUrl);
     
@@ -157,6 +196,57 @@ export function SparesChat() {
     scrollToBottom();
   }, [messages, isLoading, chatState]);
 
+<<<<<<< HEAD
+  // Simulates thinking time for the bot responses
+  // Real implementation would actually process the query
+  const simulateProcessing = () => {
+    setIsLoading(true);
+    return new Promise(resolve => {
+      // Random delay between 2-3.5 seconds to feel natural
+      const delay = 2500 + Math.random() * 1000;
+      setTimeout(() => {
+        setIsLoading(false);
+        resolve(null);
+      }, delay);
+    });
+  };
+
+  // Check if user is asking about spare parts or something else
+  const isSparePartsQuery = (message: string) => {
+    // Keywords that indicate the user wants spare parts info
+    const sparePartsKeywords = [
+      'part', 'bearing', 'motor', 'sensor', 'actuator', 'valve', 'pump', 'drive', 
+      'switch', 'relay', 'conveyor', 'hydraulic', 'pneumatic', 'electrical',
+      'robotics', 'automation', 'spare', 'component', 'equipment', 'machinery',
+      'industrial', 'tata', 'inventory', 'stock', 'price', 'quantity', 'location',
+      'x-75', 'v200', 'p450', 'help', 'what can you do'
+    ];
+    
+    const messageWords = message.toLowerCase().split(/\s+/);
+    // Return true if any word in the message matches our keywords
+    return sparePartsKeywords.some(keyword => 
+      messageWords.some(word => word.includes(keyword) || keyword.includes(word))
+    );
+  };
+
+  const generateBotResponse = async (userMessage: string, isImageUpload = false, imageData?: string) => {
+    await simulateProcessing();
+
+    // First, make sure they're asking about spare parts
+    // If not, politely redirect them to our area of expertise
+    if (!isImageUpload && !isSparePartsQuery(userMessage)) {
+      const scopeMessage: Message = {
+        id: Date.now().toString(),
+        content: "I'm a specialized chatbot designed to help with spare parts for Tata Industries. I can assist you with finding bearings, motors, sensors, hydraulic components, and other industrial spare parts. Please ask me about spare parts, inventory, or part specifications.",
+        sender: "bot",
+        timestamp: new Date(),
+        type: "text"
+      };
+      setMessages(prev => [...prev, scopeMessage]);
+      return;
+    }
+
+=======
   const simulateProcessing = () => {
     setIsLoading(true);
     return new Promise(resolve => {
@@ -170,6 +260,7 @@ export function SparesChat() {
   const generateBotResponse = async (userMessage: string, isImageUpload = false, imageData?: string) => {
     await simulateProcessing();
 
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
     try {
       if (userMessage.trim() || imageData) {
         const body: any = { messages: [{ role: 'user', content: userMessage || 'Identify this part' }] };
@@ -197,12 +288,20 @@ export function SparesChat() {
         }
       }
     } catch (e) {
+<<<<<<< HEAD
+      // fall back to local logic
+    }
+
+    // Load parts data if not cached
+    if (cachedParts.length === 0) {
+=======
       // fall back to mock logic
     }
 
     let partData;
     if (cachedParts.length === 0) {
       // Fallback to loading parts if not cached
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
       try {
         const response = await fetch('/api/parts');
         if (response.ok) {
@@ -211,11 +310,38 @@ export function SparesChat() {
         }
       } catch (error) {
         console.error('Failed to load parts:', error);
+<<<<<<< HEAD
+        const errorMessage: Message = {
+          id: Date.now().toString(),
+          content: "I'm having trouble accessing the parts database. Please try again in a moment.",
+          sender: "bot",
+          timestamp: new Date(),
+          type: "text"
+        };
+        setMessages(prev => [...prev, errorMessage]);
+        return;
+      }
+    }
+
+    let partData;
+
+    if (isImageUpload) {
+      // For image uploads, we try to match with our known parts
+      // In a real implementation, this would use computer vision
+      // For now, we'll intelligently guess based on common parts
+      const commonParts = cachedParts.filter(part => 
+        part.criticality === 'Critical' || part.criticality === 'High'
+      );
+      partData = commonParts.length > 0 
+        ? commonParts[Math.floor(Math.random() * commonParts.length)]
+        : cachedParts[Math.floor(Math.random() * cachedParts.length)];
+=======
       }
     }
 
     if (isImageUpload) {
       partData = cachedParts[Math.floor(Math.random() * cachedParts.length)];
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
     } else if (userMessage.toLowerCase().includes('bearing') || userMessage.toLowerCase().includes('x-75')) {
       partData = cachedParts.find(p => p.partNumber === "TATA-BEAR-X75-001") || cachedParts[0];
     } else if (userMessage.toLowerCase().includes('motor') || userMessage.toLowerCase().includes('v200')) {
@@ -223,6 +349,34 @@ export function SparesChat() {
     } else if (userMessage.toLowerCase().includes('sensor') || userMessage.toLowerCase().includes('p450')) {
       partData = cachedParts.find(p => p.partNumber === "TATA-SENSOR-P450-003") || cachedParts[2];
     } else {
+<<<<<<< HEAD
+      // Smart search through our parts database
+      // We check multiple fields to increase chances of finding what they need
+      const searchTerm = userMessage.toLowerCase();
+      const searchResults = cachedParts.filter(part => {
+        // Check all the important fields for matches
+        const nameMatch = part.name.toLowerCase().includes(searchTerm);
+        const partNumberMatch = part.partNumber.toLowerCase().includes(searchTerm);
+        const descriptionMatch = part.description.toLowerCase().includes(searchTerm);
+        const categoryMatch = part.category.toLowerCase().includes(searchTerm);
+        
+        // Also check for partial matches and variations
+        const searchWords = searchTerm.split(' ');
+        const wordMatches = searchWords.some(word => 
+          part.name.toLowerCase().includes(word) ||
+          part.partNumber.toLowerCase().includes(word) ||
+          part.description.toLowerCase().includes(word)
+        );
+        
+        return nameMatch || partNumberMatch || descriptionMatch || categoryMatch || wordMatches;
+      });
+
+      if (searchResults.length > 1) {
+        const options = searchResults.slice(0, 3);
+        const disambiguation: Message = {
+          id: Date.now().toString(),
+          content: "I found several matching parts. Which one are you looking for?",
+=======
       // Search for parts and show disambiguation if multiple found
       const searchResults = cachedParts.filter(part => 
         part.name.toLowerCase().includes(userMessage.toLowerCase()) ||
@@ -235,6 +389,7 @@ export function SparesChat() {
         const disambiguation: Message = {
           id: Date.now().toString(),
           content: "I found several possibilities. Which one looks correct?",
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
           sender: "bot",
           timestamp: new Date(),
           type: "result",
@@ -245,6 +400,18 @@ export function SparesChat() {
       } else if (searchResults.length === 1) {
         partData = searchResults[0];
       } else {
+<<<<<<< HEAD
+        // No parts found - provide helpful response
+        const noPartsMessage: Message = {
+          id: Date.now().toString(),
+          content: "I couldn't find any parts matching your description. Try searching for specific part numbers like 'X-75', 'V200', 'P450', or categories like 'bearings', 'motors', 'sensors'. You can also ask about inventory status or browse our parts catalog.",
+          sender: "bot",
+          timestamp: new Date(),
+          type: "text"
+        };
+        setMessages(prev => [...prev, noPartsMessage]);
+        return;
+=======
         // No matches found, show a random part with a message
         partData = cachedParts[0] || null;
         if (!partData) {
@@ -258,6 +425,7 @@ export function SparesChat() {
           setMessages(prev => [...prev, errorMessage]);
           return;
         }
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
       }
     }
 
@@ -295,8 +463,15 @@ export function SparesChat() {
   };
 
   const handleSendMessage = async () => {
+<<<<<<< HEAD
+    // Don't send empty messages or when already processing
     if (!inputValue.trim() || isLoading) return;
 
+    // Create the user message object
+=======
+    if (!inputValue.trim() || isLoading) return;
+
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
     const userMessage: Message = {
       id: Date.now().toString(),
       content: inputValue,
@@ -305,6 +480,10 @@ export function SparesChat() {
       type: "text"
     };
 
+<<<<<<< HEAD
+    // Add user message to chat and clear input
+=======
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
     setMessages(prev => [...prev, userMessage]);
     setLoadingType("text");
     const messageText = inputValue;
@@ -320,13 +499,31 @@ export function SparesChat() {
         sessionId: 'synapse_session'
       }));
     } else {
+<<<<<<< HEAD
+      // Fallback to HTTP API with better error handling
+      try {
+        const apiUrl = process.env.NODE_ENV === 'development' 
+          ? 'http://localhost:8788/api/chat'
+          : '/api/chat';
+          
+        const response = await fetch(apiUrl, {
+=======
       // Fallback to HTTP API
       try {
         const response = await fetch('/api/chat', {
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message: messageText, sessionId: 'synapse_session' })
         });
+<<<<<<< HEAD
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+=======
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
         const data = await response.json();
         
         const botMessage: Message = {
@@ -338,11 +535,24 @@ export function SparesChat() {
         };
         setMessages(prev => [...prev, botMessage]);
         setIsLoading(false);
+<<<<<<< HEAD
+        
+        // Show AI source indicator if available
+        if (data.source === 'gemini-ai') {
+          console.log('✨ Response powered by Gemini AI');
+          // You could add a visual indicator here in the future
+        }
+=======
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
       } catch (error) {
         console.error('Chat error:', error);
         const errorMessage: Message = {
           id: (Date.now() + 1).toString(),
+<<<<<<< HEAD
+          content: "Sorry, I'm having trouble connecting to the server. Please try again.",
+=======
           content: "Sorry, I'm having trouble connecting. Please try again.",
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
           sender: "bot",
           timestamp: new Date(),
           type: "text"

@@ -1,3 +1,5 @@
+// Server setup for Synapse AI Bot
+// Built for Tata Industries spare parts management
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -9,16 +11,38 @@ import { WebSocketServer } from 'ws';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
+// ES module path resolution (needed since we're using type: "module")
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Load environment variables
 dotenv.config();
 
-// Load Tata Industries parts data
+// Load our parts database - this would normally come from a real database
 const tataPartsData = JSON.parse(fs.readFileSync('./server/tata-industries-parts.json', 'utf8'));
 
+// Initialize Gemini AI
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || 'your-api-key-here');
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+// Initialize Express app with middleware
 const app = express();
+
+// Security and performance middleware
+app.use(helmet()); // Security headers
+app.use(cors()); // Allow cross-origin requests
+app.use(compression()); // Compress responses
+app.use(morgan('combined')); // Request logging
+app.use(express.json({ limit: "10mb" })); // Parse JSON bodies
+app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
+
+// Rate limiting to prevent abuse
+const limiter = rateLimit({ 
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000 // limit each IP to 1000 requests per windowMs
+});
 app.use(helmet());
 app.use(cors());
 app.use(compression());
@@ -28,20 +52,144 @@ app.use(express.urlencoded({ extended: true }));
 
 // Rate limiting
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 });
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 app.use(limiter);
 
 const PORT = process.env.PORT || 8788;
 
+<<<<<<< HEAD
+// Add API version header to all responses
+=======
 // API versioning
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 app.use((req, res, next) => {
   res.setHeader('X-API-Version', 'v1');
   next();
 });
 
+<<<<<<< HEAD
+// --------------------
+// Query understanding helpers
+// --------------------
+const GENERIC_GREETINGS = [
+  'hi', 'hello', 'hey', 'yo', 'hola', 'sup', 'how are you', 'good morning', 'good evening'
+];
+
+const SPARE_PARTS_KEYWORDS = [
+  'part', 'parts', 'bearing', 'motor', 'sensor', 'actuator', 'valve', 'pump', 'drive',
+  'switch', 'relay', 'conveyor', 'hydraulic', 'pneumatic', 'electrical', 'robotics',
+  'automation', 'spare', 'component', 'equipment', 'machinery', 'inventory', 'stock',
+  'price', 'quantity', 'location', 'part number', 'partnumber', 'model', 'code', 'catalog'
+];
+
+function isSparePartsQuery(message) {
+  const lower = (message || '').toLowerCase().trim();
+  if (!lower) return false;
+  if (GENERIC_GREETINGS.includes(lower)) return false;
+  return SPARE_PARTS_KEYWORDS.some(k => lower.includes(k));
+}
+
+function tokenizeMeaningful(message) {
+  // Split on non-alphanumeric, keep tokens length >= 3 to avoid matching 'hi'
+  return (message || '')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(token => token && token.length >= 3);
+}
+
+function findMatchingPartsByTokens(message) {
+  const tokens = tokenizeMeaningful(message);
+  if (tokens.length === 0) return [];
+
+  return tataPartsData.parts.filter(part => {
+    const haystack = [
+      part.name,
+      part.partNumber,
+      part.description,
+      part.category
+    ].join(' ').toLowerCase();
+
+    // Match if ANY meaningful token appears in the part fields
+    return tokens.some(t => haystack.includes(t));
+  });
+}
+
+const SCOPE_MESSAGE =
+  "I'm a specialized chatbot designed to help with spare parts for Tata Industries. " +
+  "Please ask me about bearings, motors, sensors, hydraulic components, part numbers, inventory or specifications.";
+
+// Intelligent chat service using Gemini AI
+async function generateIntelligentResponse(userMessage, partsContext, userLanguage = 'en') {
+  try {
+    // Create context-aware prompt for Gemini
+    const prompt = `
+You are Synapse AI, a specialized chatbot for Tata Industries spare parts management. 
+
+Your role:
+- Help users find spare parts for Tata Industries automation and industrial equipment
+- Provide accurate information about parts, inventory, and specifications
+- Only discuss spare parts, inventory, and related technical topics
+- If asked about non-spare-parts topics, politely redirect to your specialty
+
+LANGUAGE: Respond in ${userLanguage} language. If the user wrote in a local language, KEEP using that language.
+
+Available Parts Database Context:
+${JSON.stringify(partsContext, null, 2)}
+
+User Query: "${userMessage}"
+
+Instructions:
+1. If the query is about spare parts, search the provided parts database and respond with relevant information
+2. If multiple parts match, provide options for the user to choose from
+3. Include part numbers, quantities, locations, and prices when available
+4. If no parts match, suggest similar alternatives or ask for more specific details
+5. If the query is not about spare parts, politely explain your scope and redirect to spare parts topics
+6. Keep responses professional, concise, and helpful
+7. Use the exact part numbers and data from the provided database
+
+Respond in a helpful, professional manner as Synapse AI:`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    console.error('Gemini AI error:', error);
+    // Fallback to local processing
+    return null;
+  }
+}
+
+// Language helpers
+function detectLanguageFromText(text) {
+  if (!text) return 'en';
+  // Basic detection for Devanagari (Hindi) range; extendable for other scripts
+  const hasDevanagari = /[\u0900-\u097F]/.test(text);
+  if (hasDevanagari) return 'hi';
+  return 'en';
+}
+
+async function translateToEnglishWithGemini(text) {
+  try {
+    const instruction = `Translate the following user spare-parts query to English suitable for searching a parts database. Preserve technical terms and model numbers. Only output the translated text.\n\nQuery: ${text}`;
+    const result = await model.generateContent(instruction);
+    const response = await result.response;
+    return (response.text() || '').trim();
+  } catch (e) {
+    return text; // fallback: return original
+  }
+}
+
+// WebSocket service to handle real-time communication
+// Keeps track of connected clients and handles message routing
+class SimpleWebSocketService {
+  constructor() {
+    this.clients = new Map(); // Store all connected clients
+=======
 // Simple WebSocket service
 class SimpleWebSocketService {
   constructor() {
     this.clients = new Map();
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
   }
 
   initialize(server) {
@@ -157,7 +305,22 @@ class SimpleWebSocketService {
     const contentLower = content.toLowerCase();
     let response = "";
 
+<<<<<<< HEAD
+    // If it's a non-domain query or greeting, respond with scope message
+    if (!isSparePartsQuery(content)) {
+      this.sendToClient(clientId, {
+        type: 'chat_response',
+        message: SCOPE_MESSAGE,
+        sessionId: message.sessionId || 'ws_session',
+        timestamp: new Date().toISOString()
+      });
+      return;
+    }
+
+    // Smart response system - matches user queries to our parts database
+=======
     // Intelligent responses based on Tata Industries data
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
     if (contentLower.includes('bearing') || contentLower.includes('x-75')) {
       const bearing = tataPartsData.parts.find(p => p.id === 'BEAR-X75-001');
       response = `Found Bearing X-75! Part Number: ${bearing.partNumber}, Quantity: ${bearing.inventory.quantity} units at ${bearing.inventory.location}. Price: ₹${bearing.pricing.unitPrice}. This is a heavy-duty industrial bearing for Tata automation systems.`;
@@ -174,17 +337,26 @@ class SimpleWebSocketService {
     } else if (contentLower.includes('help') || contentLower.includes('what can you do')) {
       response = `I can help you with: 1) Finding spare parts (try "Bearing X-75", "Motor V200", "Sensor P450"), 2) Checking inventory status, 3) Project information, 4) Technical specifications, 5) Pricing and availability. What would you like to know?`;
     } else {
+<<<<<<< HEAD
+      // Token-based search to avoid tiny token matches
+      const matchingParts = findMatchingPartsByTokens(contentLower);
+=======
       // Search through parts for any matches
       const matchingParts = tataPartsData.parts.filter(part => 
         part.name.toLowerCase().includes(contentLower) ||
         part.partNumber.toLowerCase().includes(contentLower) ||
         part.description.toLowerCase().includes(contentLower)
       );
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
       
       if (matchingParts.length > 0) {
         const part = matchingParts[0];
         response = `Found ${part.name}! Part Number: ${part.partNumber}, Quantity: ${part.inventory.quantity} units at ${part.inventory.location}. Price: ₹${part.pricing.unitPrice}. ${part.description}`;
       } else {
+<<<<<<< HEAD
+        // Help the user with suggestions when we can't find what they're looking for
+=======
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
         response = `I couldn't find specific information about "${content}". Try asking about: Bearing X-75, Motor Drive V200, Proximity Sensor P450, inventory status, or Tata Industries projects. I'm here to help with spare parts and technical information!`;
       }
     }
@@ -236,7 +408,11 @@ class SimpleWebSocketService {
 // Initialize WebSocket service
 const wsService = new SimpleWebSocketService();
 
+<<<<<<< HEAD
+// Basic health check endpoint
+=======
 // Health check
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 app.get("/api/health", (_req, res) => {
   res.json({ 
     status: "ok", 
@@ -247,9 +423,16 @@ app.get("/api/health", (_req, res) => {
   });
 });
 
+<<<<<<< HEAD
+// Enhanced chat endpoint with Gemini AI integration
+app.post("/api/chat", async (req, res) => {
+  const { message } = req.body;
+  const acceptLang = (req.headers['accept-language'] || '').split(',')[0] || 'en';
+=======
 // Chat endpoint with Tata Industries intelligence
 app.post("/api/chat", (req, res) => {
   const { message } = req.body;
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
   
   if (!message) {
     return res.json({
@@ -259,10 +442,48 @@ app.post("/api/chat", (req, res) => {
     });
   }
 
+<<<<<<< HEAD
+  try {
+    // Normalize multilingual queries: detect & translate to English for matching context
+    const detectedLang = detectLanguageFromText(message);
+    const normalizedMessage = detectedLang === 'en' ? message : await translateToEnglishWithGemini(message);
+
+    // Try Gemini AI first for intelligent responses
+    const aiResponse = await generateIntelligentResponse(normalizedMessage, tataPartsData, detectedLang || acceptLang);
+    
+    if (aiResponse) {
+      return res.json({
+        response: aiResponse,
+        sessionId: 'simple_session',
+        timestamp: new Date().toISOString(),
+        source: 'gemini-ai'
+      });
+    }
+  } catch (error) {
+    console.error('AI response error:', error);
+  }
+
+  // Fallback to local logic if AI fails
+  const messageLower = (message || '').toLowerCase();
+  let response = "";
+
+  // Guard: If it's just a greeting or non-domain text, respond with scope message
+  if (!isSparePartsQuery(message)) {
+    return res.json({
+      response: SCOPE_MESSAGE,
+      sessionId: 'simple_session',
+      timestamp: new Date().toISOString(),
+      source: 'scope'
+    });
+  }
+
+  // Smart response system - matches user queries to our parts database
+=======
   const messageLower = message.toLowerCase();
   let response = "";
 
   // Intelligent responses based on Tata Industries data
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
   if (messageLower.includes('bearing') || messageLower.includes('x-75')) {
     const bearing = tataPartsData.parts.find(p => p.id === 'BEAR-X75-001');
     response = `Found Bearing X-75! Part Number: ${bearing.partNumber}, Quantity: ${bearing.inventory.quantity} units at ${bearing.inventory.location}. Price: ₹${bearing.pricing.unitPrice}. This is a heavy-duty industrial bearing for Tata automation systems.`;
@@ -284,12 +505,17 @@ app.post("/api/chat", (req, res) => {
   } else if (messageLower.includes('help') || messageLower.includes('what can you do')) {
     response = `I can help you with: 1) Finding spare parts (try "Bearing X-75", "Motor V200", "Sensor P450"), 2) Checking inventory status, 3) Project information, 4) Technical specifications, 5) Pricing and availability. What would you like to know?`;
   } else {
+<<<<<<< HEAD
+    // Tokenized search through parts to avoid matching tiny words like 'hi'
+    const matchingParts = findMatchingPartsByTokens(messageLower);
+=======
     // Search through parts for any matches
     const matchingParts = tataPartsData.parts.filter(part => 
       part.name.toLowerCase().includes(messageLower) ||
       part.partNumber.toLowerCase().includes(messageLower) ||
       part.description.toLowerCase().includes(messageLower)
     );
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
     
     if (matchingParts.length > 0) {
       const part = matchingParts[0];
@@ -302,7 +528,12 @@ app.post("/api/chat", (req, res) => {
   res.json({
     response,
     sessionId: 'simple_session',
+<<<<<<< HEAD
+    timestamp: new Date().toISOString(),
+    source: 'local'
+=======
     timestamp: new Date().toISOString()
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
   });
 });
 
@@ -331,8 +562,13 @@ app.get("/api/inventory/status", (_req, res) => {
     inStock,
     outOfStock,
     lowStock,
+<<<<<<< HEAD
+    featured: featuredParts,
+    lastUpdated: new Date().toISOString(),
+=======
     featuredParts,
     lastUpdate: new Date().toISOString(),
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
     company: "Tata Industries",
     categories: tataPartsData.categories.length
   });
@@ -382,6 +618,54 @@ app.get("/api/parts", (req, res) => {
   });
 });
 
+<<<<<<< HEAD
+// Part request endpoint with inventory decrement
+app.post("/api/parts/:id/request", (req, res) => {
+  const { id } = req.params;
+  
+  // Find the part in our data
+  const part = tataPartsData.parts.find(p => p.id === id);
+  
+  if (!part) {
+    return res.status(404).json({ 
+      error: "Part not found",
+      timestamp: new Date().toISOString()
+    });
+  }
+  
+  if (part.inventory.quantity <= 0) {
+    return res.status(400).json({ 
+      error: "Part is out of stock",
+      timestamp: new Date().toISOString()
+    });
+  }
+  
+  // Decrement inventory
+  part.inventory.quantity -= 1;
+  part.inventory.lastUpdated = new Date().toISOString();
+  
+  // Broadcast inventory update via WebSocket
+  wsService.broadcastToChannel('inventory', {
+    type: 'inventory_update',
+    partId: id,
+    partNumber: part.partNumber,
+    newQuantity: part.inventory.quantity,
+    action: 'requested',
+    timestamp: new Date().toISOString()
+  });
+  
+  res.json({
+    success: true,
+    message: `Part ${part.partNumber} requested successfully`,
+    newQuantity: part.inventory.quantity,
+    partName: part.name,
+    requestId: `REQ-${Date.now()}`,
+    timestamp: new Date().toISOString()
+  });
+});
+
+=======
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 // User search
 app.get("/api/users/search", (req, res) => {
   const { q } = req.query;
@@ -420,9 +704,16 @@ app.post("/api/images/upload", (req, res) => {
       size: 1024000,
       mimetype: "image/jpeg",
       uploadedAt: new Date().toISOString(),
+<<<<<<< HEAD
+      ocrText: "",
+      hints: { sizeBytes: 1024000, available: true }
+    },
+    note: "⚠️ Image recognition is not trained for this image. Sorry, I cannot recognize this part with the current data. Please try describing the part or provide a part number."
+=======
       ocrText: "Sample OCR text from uploaded image",
       hints: { sizeBytes: 1024000, available: true }
     }
+>>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
   });
 });
 
