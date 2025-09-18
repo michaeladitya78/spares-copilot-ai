@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@layer theme, base, components, utilities;
+
+@layer theme {
+  :root {
+    --color-bg: #111827; /* Deep Slate */
+    --color-text: #F9FAFB; /* Off-White */
+    --color-text-secondary: #9CA3AF; /* Cool Grey */
+    --color-accent: #06B6D4; /* Electric Cyan */
+    --color-success: #10B981; /* Success Green */
+    --color-warning: #F59E0B; /* Warning Amber */
+    --color-error: #EF4444; /* Error Red */
+  }
+}
+
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-[--color-bg] text-[--color-text];
+    font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-md bg-[--color-accent] px-4 py-2 text-[--color-bg] font-semibold hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[--color-accent] focus-visible:ring-offset-[--color-bg] active:opacity-80;
+  }
+  .status-lozenge {
+    @apply inline-flex items-center px-2 py-1 rounded-md text-xs font-medium uppercase tracking-wide;
+  }
+  .status-success { @apply bg-[--color-success]/20 text-[--color-success]; }
+  .status-warning { @apply bg-[--color-warning]/20 text-[--color-warning]; }
+  .status-error { @apply bg-[--color-error]/20 text-[--color-error]; }
+  .card {
+    @apply w-full rounded-lg border border-white/10 bg-white/5 shadow-sm;
+  }
+}
+
+@layer utilities {
+  .hocus:focus-visible, .hocus:hover { @apply outline-none; }
+}
