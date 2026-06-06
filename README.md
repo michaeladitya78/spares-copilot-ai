@@ -92,17 +92,12 @@ ws.onmessage = (event) => {
 ### Installation
 ```bash
 # Clone repository
-<<<<<<< HEAD
 git clone https://github.com/michaeladitya78/spares-copilot-ai.git
-=======
-git clone <repository-url>
->>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 cd spares-copilot-ai
 
 # Install dependencies
 npm install
 
-<<<<<<< HEAD
 # Optional: Add Gemini API key for enhanced AI responses
 echo "GEMINI_API_KEY=your_api_key_here" > .env
 
@@ -134,17 +129,6 @@ For detailed testing results and architecture analysis, see [TESTING_REPORT.md](
 - ✅ Advanced search functionality
 - ✅ Camera/image input processing
 - ✅ **NEW**: Google Gemini AI integration for intelligent responses
-=======
-# Start development server
-npm run server:simple
-```
-
-### Access Points
-- **Bot Interface**: http://localhost:8787/bot
-- **API Health**: http://localhost:8787/api/health
-- **API Documentation**: http://localhost:8787/api/docs
-- **WebSocket**: ws://localhost:8787/ws
->>>>>>> c2da06511a66cf17d7e6c6480706e6b7e0b8cedb
 
 ## 🎯 Features
 
